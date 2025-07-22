@@ -46,6 +46,7 @@ class Index extends Component
             'author' => $this->author,
             'is_published' => $this->is_published
         ]);
+        $this->dispatch('success', message: 'Post created successfully');
         $this->dispatch('hide-modal');
         $this->resetFields();
         $this->dispatch('datatable-reinit');
@@ -75,6 +76,7 @@ class Index extends Component
         $p->author = $this->author;
         $p->is_published = $this->is_published;
         $p->save();
+        $this->dispatch('success', message: 'User updated successfully');
 
         $this->dispatch('hide-modal');
         $this->resetFields();
@@ -84,6 +86,7 @@ class Index extends Component
     #[On('delete-record')]
     public function delete($id) {
         Post::findOrFail($id)->delete();
+        $this->dispatch('success', message: 'User deleted successfully');
         $this->loadPosts();
         $this->dispatch('datatable-reinit');
     }

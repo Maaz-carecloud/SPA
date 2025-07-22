@@ -12,6 +12,7 @@
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" data-navigate-once>
         <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" data-navigate-once>
         <link rel="stylesheet" href="{{ asset('css/datatable-custom.css') }}" data-navigate-once>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css" data-navigate-once>
         <title>{{ $title ?? 'Laravel' }}</title>
         @livewireStyles
         @stack('styles')
@@ -75,7 +76,8 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js" data-navigate-once></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js" data-navigate-once></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js" data-navigate-once></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" data-navigate-once></script>
+        <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js" data-navigate-once></script>
         @livewireScripts
         @stack('scripts')
         <script>
@@ -90,6 +92,7 @@
             }
             document.addEventListener('DOMContentLoaded', registerUserModalAndTableEvents);
             document.addEventListener('livewire:navigated', registerUserModalAndTableEvents);
+
             // Delegate click for delete with SweetAlert2
             document.body.addEventListener('click', function(e) {
                 var delBtn = e.target.closest('.delete-swal');
@@ -111,6 +114,29 @@
                     });
                 }
             });
+
+            document.removeEventListener('error', window.__notyfErrorHandler);
+            document.removeEventListener('success', window.__notyfSuccessHandler);
+
+            var notyf = new Notyf({
+                duration: 5000, // Increased from 2500ms to 5000ms (5 seconds)
+                position: {
+                    x: 'right',
+                    y: 'top',
+                },
+                dismissible: true, // Allow manual dismissal
+                ripple: true
+            });
+
+            window.__notyfErrorHandler = function(event) {
+                notyf.error(event.detail.message);
+            };
+            window.__notyfSuccessHandler = function(event) {
+                notyf.success(event.detail.message);
+            };
+
+            document.addEventListener('error', window.__notyfErrorHandler);
+            document.addEventListener('success', window.__notyfSuccessHandler);
         </script>
     </body>
 </html>

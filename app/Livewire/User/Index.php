@@ -37,6 +37,7 @@ class Index extends Component
             'email' => $this->email,
             'password' => Hash::make($this->password)
         ]);
+        $this->dispatch('success', message: 'User created successfully');
         $this->dispatch('hide-modal');
         $this->resetFields();
         $this->dispatch('datatable-reinit');
@@ -68,6 +69,7 @@ class Index extends Component
             $u->password = Hash::make($this->password);
         }
         $u->save();
+        $this->dispatch('success', message: 'User updated successfully');
         $this->dispatch('hide-modal');
         $this->resetFields();
         $this->dispatch('datatable-reinit');
@@ -76,6 +78,7 @@ class Index extends Component
     #[On('delete-record')]
     public function delete($id) {
         User::findOrFail($id)->delete();
+        $this->dispatch('success', message: 'User deleted successfully');
         $this->loadUsers();
         $this->dispatch('datatable-reinit');
     }
