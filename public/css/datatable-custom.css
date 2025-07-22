@@ -1,0 +1,176 @@
+/* DataTable Toolbar and Export Dropdown Custom Styles */
+.datatable-toolbar {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.datatable-toolbar .datatable-export {
+    min-width: 120px;
+    margin-left: 1rem;
+}
+.datatable-toolbar .dropdown-toggle {
+    min-width: 100px;
+}
+.datatable-search {
+    flex-grow: 1;
+    min-width: 200px;
+}
+.datatable-search .dataTables_filter {
+    margin-bottom: 0;
+    float: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+.datatable-search input[type="search"] {
+    margin-left: 0.5rem;
+    min-width: 180px;
+}
+/* DataTable Custom Styles */
+.custom-table-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.table-custom {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: transparent;
+}
+.table-custom th {
+    background: #ffffff !important;
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: capitalize;
+    border-top: 2px solid #e9ecef;
+    padding: 14px 12px;
+    color: #222;
+}
+.table-custom td {
+    padding: 12px 12px;
+    vertical-align: middle;
+    border-top: none;
+    border-bottom: 1px solid #f1f1f1;
+    background: #fff;
+}
+.dataTables_filter {
+    float: left !important;
+    text-align: left !important;
+    margin-bottom: 0;
+}
+.dataTables_filter label {
+    font-size: 0;
+}
+.dataTables_filter input[type="search"] {
+    width: 100%;
+    max-width: 320px;
+    border-radius: 24px;
+    border: 1px solid #e0e0e0;
+    padding: 8px 36px 8px 16px;
+    font-size: 1rem;
+    background: #ffffff url('data:image/svg+xml;utf8,<svg fill="gray" height="18" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99c.41.41 1.09.41 1.5 0s.41-1.09 0-1.5l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>') no-repeat right 12px center/18px 18px;
+    outline: none;
+    transition: border 0.2s;
+}
+.dataTables_filter input[type="search"]:focus {
+    border: 1.5px solid #bdbdbd;
+    background-color: #fff;
+}
+.custom-export-dropdown .btn {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    color: #333;
+    font-weight: 500;
+    padding: 8px 24px 8px 16px;
+    font-size: 1rem;
+    box-shadow: none;
+    transition: background 0.2s, border 0.2s;
+}
+.custom-export-dropdown .btn:after {
+    margin-left: 8px;
+}
+.custom-export-dropdown .dropdown-menu {
+    min-width: 140px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid #e0e0e0;
+}
+.custom-export-dropdown .dropdown-item {
+    font-size: 1rem;
+    padding: 8px 16px;
+}
+.dataTables_length {
+    float: left !important;
+    text-align: left !important;
+    margin-top: 16px;
+}
+.dataTables_length label {
+    font-weight: 500;
+    color: #555;
+    font-size: 1rem;
+}
+.dataTables_length select {
+    border-radius: 16px;
+    border: 1px solid #e0e0e0;
+    padding: 2px !important;
+    font-size: 1rem;
+    margin-left: 8px;
+    background: #f8f9fa;
+    outline: none;
+    transition: border 0.2s;
+}
+.dataTables_length select:focus {
+    border: 1.5px solid #bdbdbd;
+    background: #fff;
+}
+.dataTables_paginate {
+    float: right !important;
+    text-align: right !important;
+    margin-top: 16px;
+}
+.dataTables_paginate .paginate_button {
+    border-radius: 8px !important;
+    border: 1.5px solid #e0e0e0 !important;
+    background: #fff !important;
+    color: #222 !important;
+    margin: 0 4px;
+    padding: 3px 9px !important;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current{
+    color: #ffffff !important;
+}
+.dataTables_paginate .paginate_button.current,
+.dataTables_paginate .paginate_button.current:hover {
+    background: #C72127 !important;
+    color: #fff !important;
+    border: 1.5px solid #C72127 !important;
+    font-weight: 700;
+}
+.dataTables_paginate .paginate_button:hover:not(.current) {
+    background: #f7f7f9 !important;
+    color: #C72127 !important;
+    border: 1.5px solid #C72127 !important;
+}
+.dataTables_paginate .ellipsis {
+    background: transparent !important;
+    border: none !important;
+    color: #888 !important;
+    padding: 3px 7px;
+}
+.dataTables_info {
+    text-align: center !important;
+    margin-top: 16px;
+    color: #888;
+    font-size: 1rem;
+}
+.table-custom, .table-custom th, .table-custom td {
+    border: none !important;
+} 
