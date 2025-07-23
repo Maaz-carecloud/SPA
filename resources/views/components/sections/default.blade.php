@@ -6,7 +6,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-xl-12">
-                        <div class="bgs-card bgs-table-card">
+                        <div class="bgs-card {{ !request()->is('dashboard') ? 'bgs-table-card' : '' }}">
                             {{ $slot }}
                         </div>
                     </div>

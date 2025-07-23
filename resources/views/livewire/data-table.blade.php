@@ -16,7 +16,7 @@
             </div>
         </div>
     </div>
-    <div class="table-responsive">
+    <div class="">
         <table class="table table-striped table-borderless mb-0" id="{{ $tableId }}">
             <thead>
                 <tr>
