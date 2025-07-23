@@ -1,0 +1,73 @@
+/* BGS-branded preloader styles */
+.bgs-preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.3s ease-out;
+}
+
+/* Ensure content visibility after preloader is hidden */
+body:not(.preloading) #appWrapper,
+body:not(.preloading) #guestWrapper,
+body:not(.preloading) .Dashboard,
+body:not(.preloading) .content-wrapper {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+.bgs-preloader.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.bgs-logo-container {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.bgs-logo {
+    max-width: 120px;
+    animation: pulse 1.5s infinite ease-in-out alternate;
+}
+
+@keyframes pulse {
+    from { opacity: 0.6; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.bgs-progress {
+    width: 200px;
+    height: 4px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.bgs-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #C72127, #FCCD0E, #3AC154);
+    animation: progress 2s ease-out forwards;
+}
+
+@keyframes progress {
+    from { width: 0%; }
+    to { width: 100%; }
+}
+
+.bgs-preloader-text {
+    margin-top: 10px;
+    font-family: 'Outfit', sans-serif;
+    color: #333;
+    font-size: 14px;
+}

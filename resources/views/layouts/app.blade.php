@@ -3,8 +3,10 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="csrf-token" content="{{ csrf_token() }}" />
+        <link rel="icon" href="{{ asset('assets/images/bgs-logo-monogram.webp') }}" type="image/x-icon">
 
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" data-navigate-once>
+        <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet" data-navigate-once>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" data-navigate-once>
         <link rel="preconnect" href="https://fonts.googleapis.com" data-navigate-once>
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin data-navigate-once>
@@ -13,62 +15,17 @@
         <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" data-navigate-once>
         <link rel="stylesheet" href="{{ asset('css/datatable-custom.css') }}" data-navigate-once>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css" data-navigate-once>
-        <title>{{ $title ?? 'Laravel' }}</title>
+        <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}" data-navigate-once>
+        <title>{{ $title ?? 'BGS Grammar School' }}</title>
         @livewireStyles
         @stack('styles')
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-            body {
-                font-family: "Outfit", sans-serif;
-                background-color: #f8f9fa;
-                font-weight: 400;
-            }
-            .theme-filled-btn,
-            .theme-unfilled-btn:hover,
-            .theme-filled-btn:hover {
-                background-color: #C72127;
-                border: 1px solid #C72127;
-                color: #ffffff;
-            }
-            
-            .theme-unfilled-btn {
-                background-color: transparent;
-                border: 1px solid #C72127;
-                color: #C72127;
-            }
-            .action-items span {
-                width: 30px;
-                height: 30px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 100%;
-                background-color: #c721271f;
-                margin: 0 0.25rem;
-                cursor: pointer;
-            }
-                
-            .action-items span i {
-                color: #C72127;
-            }
-        </style>
     </head>
-    <body>
-        <div class="container mt-3">
-            <nav class="mb-4">
-                <ul class="nav nav-pills">
-                    <li class="nav-item">
-                        <a class="nav-link{{ request()->is('/') || request()->is('posts') ? ' active' : '' }}" href="/" wire:navigate>Posts</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link{{ request()->is('users') ? ' active' : '' }}" href="/users" wire:navigate>Users</a>
-                    </li>
-                </ul>
-            </nav>
-            {{ $slot }}
-        </div>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js" data-navigate-once></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" data-navigate-once></script>
+    <body class="overflow-x-hidden">
+        {{ $slot }}
+        <script src="{{ asset('assets/js/jquery-3.6.0.min.js') }}" data-navigate-once></script>
+        <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}" data-navigate-once></script>
+        <script data-navigate-once src="{{ asset('assets/js/chart.js') }}"></script>
+        <script data-navigate-once src="{{ asset('assets/js/main.js') }}"></script>
         <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js" data-navigate-once></script>
         <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js" data-navigate-once></script>
         <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js" data-navigate-once></script>
@@ -78,8 +35,10 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js" data-navigate-once></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" data-navigate-once></script>
         <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js" data-navigate-once></script>
+
         @livewireScripts
         @stack('scripts')
+
         <script>
             //This global function handled Closing the modal from the component event $this->dispatch('hide-modal')
             function registerUserModalAndTableEvents() {

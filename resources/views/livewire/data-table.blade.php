@@ -1,7 +1,4 @@
-@push('styles')
-
-@endpush
-<div class="custom-table-container" wire:ignore.self>
+<div class="table-theme" wire:ignore.self>
     <div class="datatable-toolbar d-flex justify-content-between align-items-center mb-2 flex-wrap">
         <div class="datatable-search flex-grow-1"></div>
         <div class="datatable-export">
@@ -19,24 +16,26 @@
             </div>
         </div>
     </div>
-    <table class="table table-custom table-striped table-borderless mb-0" id="{{ $tableId }}">
-        <thead>
-            <tr>
-                @foreach($columns as $col)
-                <th>{{ $col }}</th>
+    <div class="table-responsive">
+        <table class="table table-striped table-borderless mb-0" id="{{ $tableId }}">
+            <thead>
+                <tr>
+                    @foreach($columns as $col)
+                    <th>{{ $col }}</th>
+                    @endforeach
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($rows as $row)
+                <tr>
+                    @foreach($row as $cell)
+                    <td>{!! $cell !!}</td>
+                    @endforeach
+                </tr>
                 @endforeach
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($rows as $row)
-            <tr>
-                @foreach($row as $cell)
-                <td>{!! $cell !!}</td>
-                @endforeach
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @push('scripts')

@@ -1,0 +1,6 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="32" cy="32" r="32" fill="#007bff"/>
+  <circle cx="32" cy="24" r="8" fill="white"/>
+  <path d="M16 48c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="white"/>
+  <text x="32" y="38" text-anchor="middle" fill="white" font-family="Arial" font-size="12" font-weight="bold">U</text>
+</svg>

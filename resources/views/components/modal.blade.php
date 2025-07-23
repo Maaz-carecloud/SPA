@@ -1,7 +1,7 @@
 @props(['id','title','action','is_edit'])
     <!-- Modal -->
-    <div class="modal fade" id="{{ $id }}" tabindex="-1" aria-labelledby="{{ $id }}Label" wire:ignore.self>
-        <div class="modal-dialog">
+    <div class="modal fade modal-right-bottom" id="{{ $id }}" tabindex="-1" aria-labelledby="{{ $id }}Label" role="document" wire:ignore.self>
+        <div class="modal-dialog-right modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="{{ $id }}Label">{{ $title }}</h5>
