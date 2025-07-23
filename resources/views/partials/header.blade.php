@@ -1,6 +1,15 @@
-<div class="header">
+<div class="header" x-data="{
+    toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const contentWrapper = document.getElementById('contentWrapper');
+        if (sidebar && contentWrapper) {
+            sidebar.classList.toggle('collapsed');
+            contentWrapper.classList.toggle('sidebar-collapsed');
+        }
+    }
+}">
   <div class="d-flex gap-3 w-auto align-items-center">
-    <span class="toggle-btn" id="toggleSidebar">
+    <span class="toggle-btn" id="toggleSidebar" x-on:click="toggleSidebar()">
       <i class="fas fa-bars"></i>
     </span>
   </div>
