@@ -15,7 +15,7 @@
                     $index + 1,
                     e($user->name),
                     e($user->email),
-                    '<div class="action-items"><span><a href="javascript:void(0)" @click="$dispatch(\'edit-mode\', {id: ' . $user->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                    '<div class="action-items"><span><a href="javascript:void(0)" @click.prevent="$dispatch(\'edit-mode\', {id: ' . $user->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
                     . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $user->id . '"><i class="fa fa-trash"></i></a></span></div>'
                 ];
             }

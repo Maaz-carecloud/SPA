@@ -81,6 +81,7 @@
         @livewireScripts
         @stack('scripts')
         <script>
+            //This global function handled Closing the modal from the component event $this->dispatch('hide-modal')
             function registerUserModalAndTableEvents() {
                 Livewire.on('hide-modal', function () {
                     var modalEl = document.getElementById('createModal');
@@ -114,7 +115,7 @@
                     });
                 }
             });
-
+            //This function is responsible for showing the success/error alerts
             document.removeEventListener('error', window.__notyfErrorHandler);
             document.removeEventListener('success', window.__notyfSuccessHandler);
 

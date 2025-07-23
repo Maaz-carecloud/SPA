@@ -16,7 +16,7 @@
                     e($post->description),
                     e($post->author),
                     $post->is_published == 1 ? 'Yes' : 'No',
-                    '<div class="action-items"><span><a @click="$dispatch(\'edit-mode\', {id: ' . $post->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                    '<div class="action-items"><span><a @click.prevent="$dispatch(\'edit-mode\', {id: ' . $post->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
                     . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $post->id . '"><i class="fa fa-trash"></i></a></span></div>'
                 ];
             }
