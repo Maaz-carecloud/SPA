@@ -14,8 +14,11 @@ class Index extends Component
 {
     public $classes;
 
+    public $teacherOptions = [];
+
     public function mount(){
         $this->loadClasses();
+        $this->teacherOptions = \App\Models\User::where('user_type', 'teacher')->pluck('name', 'id')->toArray();
     }
 
     // Modal related methods
@@ -106,13 +109,15 @@ class Index extends Component
     }
 
     public function loadClasses(){
-        $this->classes = ClassModel::orderByDesc('created_at')->get();
+        $this->classes = ClassModel::with('teacher.user')->orderByDesc('created_at')->get();
     }
 
     #[Title('All Classes')]
     #[Layout('layouts.app')]
     public function render()
     {
-        return view('livewire.class.index');
+        return view('livewire.class.index', [
+            'teacherOptions' => $this->teacherOptions,
+        ]);
     }
 }

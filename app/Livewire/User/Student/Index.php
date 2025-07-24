@@ -36,7 +36,9 @@ class Index extends Component
     public function mount() { $this->loadStudents(); }
 
     public function loadStudents() {
-        $this->students = Student::with('user')->orderByDesc('created_at')->get();
+        $this->students = Student::with(['user', 'parent.user', 'class', 'section'])
+            ->orderByDesc('created_at')
+            ->get();
     }
 
     #[On('create-student')]
@@ -55,7 +57,7 @@ class Index extends Component
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
             'avatar' => 'nullable|image|max:2048',
-            'cnic' => ['nullable', 'string', 'max:30', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+            'cnic' => ['required', 'string', 'max:30', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
             'blood_group' => 'nullable|string|max:10',
             'registration_no' => 'nullable|string|max:50',
             'transport_status' => 'nullable|in:0,1',
@@ -168,7 +170,7 @@ class Index extends Component
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
             'avatar' => 'nullable|image|max:2048',
-            'cnic' => ['nullable', 'string', 'max:30', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+            'cnic' => ['required', 'string', 'max:30', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
             'blood_group' => 'nullable|string|max:10',
             'registration_no' => 'nullable|string|max:50',
             'transport_status' => 'nullable|in:0,1',

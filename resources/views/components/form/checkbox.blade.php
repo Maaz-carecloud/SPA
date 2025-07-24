@@ -1,5 +1,6 @@
 @props([
     'label',
+    'id',
     'name',
     'value' => '',
     'model' => null,
@@ -13,7 +14,7 @@
 <div class="{{ $containerClass }}">
     <input 
         type="checkbox"
-        id="{{ $name }}_{{ $value ?: 'checkbox' }}"
+        id="{{ $id }}"
         name="{{ $name }}"
         value="{{ $value }}"
         @if($model) 
@@ -28,7 +29,7 @@
     @if($label)
         <label 
             class="{{ $labelClass }}" 
-            for="{{ $name }}_{{ $value ?: 'checkbox' }}"
+            for="{{ $id }}"
         >
             {{ $label }}
         </label>

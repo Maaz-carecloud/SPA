@@ -16,6 +16,7 @@ class Index extends Component
 
     public function mount(){
         $this->loadRoles();
+        $this->permissions = \App\Models\Permission::orderBy('module_name')->get();
     }
 
     // Modal related methods
@@ -31,12 +32,17 @@ class Index extends Component
 
     public $getRole;
 
+    public $selectedPermissions = [];
+    public $permissions;
+
     #[On('create-role')]
     public function save(){
         $this->validate();
-        Role::create([
+        $role = Role::create([
             'name' => $this->name
         ]);
+        $permissionNames = \App\Models\Permission::whereIn('id', $this->selectedPermissions)->pluck('name')->toArray();
+        $role->syncPermissions($permissionNames);
         $this->dispatch('success', message: 'Role created successfully');
         $this->dispatch('hide-modal');
         $this->resetFields();
@@ -51,6 +57,7 @@ class Index extends Component
 
         $this->getRole = Role::findOrfail($id);
         $this->name = $this->getRole->name;
+        $this->selectedPermissions = $this->getRole->permissions->pluck('id')->toArray();
     }
 
     #[On('edit-role')]
@@ -59,6 +66,8 @@ class Index extends Component
         $r = Role::findOrFail($this->getRole->id);
         $r->name = $this->name;
         $r->save();
+        $permissionNames = \App\Models\Permission::whereIn('id', $this->selectedPermissions)->pluck('name')->toArray();
+        $r->syncPermissions($permissionNames);
         $this->dispatch('success', message: 'Role updated successfully');
         $this->dispatch('hide-modal');
         $this->resetFields();
@@ -76,7 +85,7 @@ class Index extends Component
     #[On('create-role-close')]
     #[On('edit-role-close')]
     public function resetFields(){
-        $this->reset(['name', 'getRole']);
+        $this->reset(['name', 'getRole', 'selectedPermissions']);
         $this->modalTitle = 'Create Role';
         $this->modalAction = 'create-role';
         $this->is_edit = false;
@@ -86,7 +95,7 @@ class Index extends Component
     }
 
     public function loadRoles(){
-        $this->roles = Role::orderByDesc('created_at')->get();
+        $this->roles = Role::with('permissions')->orderByDesc('created_at')->get();
     }
 
     #[Title('All Roles')]

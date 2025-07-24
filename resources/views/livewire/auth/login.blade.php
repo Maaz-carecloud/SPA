@@ -32,6 +32,7 @@
                             required />
                         <x-form.checkbox 
                             label="Remember me!" 
+                            id="remember" 
                             name="remember" 
                             model="remember" />
                         <div class="d-grid mb-3 mt-3">

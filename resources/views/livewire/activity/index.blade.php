@@ -67,7 +67,7 @@
                         . '</div>';
                     $rows[] = [
                         $index + 1,
-                        '<div class="d-flex align-items-center"><div class="avatar-sm me-2"><div class="avatar-title bg-light text-primary rounded-circle"><i class="fas fa-file-text"></i></div></div><div><h6 class="mb-0">' . e($activity->description) . '</h6><small class="text-muted">ID: ' . e($activity->id) . '</small></div></div>',
+                        e($activity->description),
                         $userCell,
                         $methodCell,
                         '<div class="text-truncate" style="max-width: 200px;" title="' . e($activity->route ?? 'N/A') . '">' . e($activity->route ?? 'N/A') . '</div>',

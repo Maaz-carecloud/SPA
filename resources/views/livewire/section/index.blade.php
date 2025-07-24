@@ -6,14 +6,15 @@
         </button>
     </div>
     @php
-        $columns = ['#', 'Name', 'Class ID', 'Category', 'Capacity', 'Note', 'Action'];
+        $columns = ['#', 'Name', 'Class', 'Category', 'Capacity', 'Note', 'Action'];
         $rows = [];
         if($sections && count($sections)) {
             foreach($sections as $index => $section) {
+                $className = $section->class->name ?? ($classOptions[$section->class_id] ?? $section->class_id);
                 $rows[] = [
                     $index + 1,
                     e($section->name),
-                    e($section->class_id),
+                    e($className),
                     e($section->category),
                     e($section->capacity),
                     e($section->note),
@@ -27,41 +28,11 @@
     
     <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit">
         <form>
-            <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" wire:model="name">
-                @error('name')
-                <p class="text-danger">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="mb-3">
-                <label for="class_id" class="form-label">Class ID</label>
-                <input type="text" class="form-control" id="class_id" wire:model="class_id">
-                @error('class_id')
-                <p class="text-danger">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="mb-3">
-                <label for="category" class="form-label">Category</label>
-                <input type="text" class="form-control" id="category" wire:model="category">
-                @error('category')
-                <p class="text-danger">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="mb-3">
-                <label for="capacity" class="form-label">Capacity</label>
-                <input type="text" class="form-control" id="capacity" wire:model="capacity">
-                @error('capacity')
-                <p class="text-danger">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="mb-3">
-                <label for="note" class="form-label">Note</label>
-                <input type="text" class="form-control" id="note" wire:model="note">
-                @error('note')
-                <p class="text-danger">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-form.input label="Name" name="name" model="name" required='true' />
+            <x-form.select2 label="Class" id="class_id" name="class_id" :options="$classOptions" model="class_id" placeholder="Select Class" required='true' />
+            <x-form.input label="Category" name="category" model="category" />
+            <x-form.input label="Capacity" name="capacity" model="capacity" />
+            <x-form.ckeditor label="Note" name="note" model="note" />
         </form>
     </x-modal>
 </x-sections.default>

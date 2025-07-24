@@ -25,27 +25,22 @@
     
     <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit">
         <form>
-            <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" wire:model="name">
-                @error('name')
-                <p class="text-danger">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="mb-3">
-                <label for="module_name" class="form-label">Module Name</label>
-                <input type="text" class="form-control" id="module_name" wire:model="module_name">
-                @error('module_name')
-                <p class="text-danger">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="mb-3">
-                <label for="guard_name" class="form-label">Guard Name</label>
-                <input type="text" class="form-control" id="guard_name" wire:model="guard_name">
-                @error('guard_name')
-                <p class="text-danger">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-form.input 
+                label="Name" 
+                name="name" 
+                model="name" 
+                :required="true" 
+                placeholder="Enter permission name" 
+            />
+            <x-form.select2
+                label="Module Name"
+                id="module_name"
+                name="module_name"
+                model="module_name"
+                :options="$modules"
+                :required="true"
+                placeholder="Select module name"
+            />
         </form>
     </x-modal>
 </x-sections.default>

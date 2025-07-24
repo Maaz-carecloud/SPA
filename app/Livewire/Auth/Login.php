@@ -61,7 +61,7 @@ class Login extends Component
         if (Auth::attempt($credentials, $this->remember)) 
         {
             session()->regenerate();
-            $this->redirect('/dashboard');
+            $this->redirect('/dashboard', navigate:true);
         } 
         else
         {

@@ -9,6 +9,7 @@ use Livewire\Attributes\Rule;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
+use App\Models\ClassModel;
 
 class Index extends Component
 {
@@ -16,6 +17,7 @@ class Index extends Component
 
     public function mount(){
         $this->loadSections();
+        $this->classOptions = ClassModel::orderBy('name')->pluck('name', 'id')->toArray();
     }
 
     // Modal related methods
@@ -119,10 +121,14 @@ class Index extends Component
         $this->sections = Section::orderByDesc('created_at')->get();
     }
 
+    public $classOptions = [];
+
     #[Title('All Sections')]
     #[Layout('layouts.app')]
     public function render()
     {
-        return view('livewire.section.index');
+        return view('livewire.section.index', [
+            'classOptions' => $this->classOptions,
+        ]);
     }
 }

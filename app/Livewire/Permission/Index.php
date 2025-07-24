@@ -13,9 +13,11 @@ use Illuminate\Support\Facades\Auth;
 class Index extends Component
 {
     public $permissions;
+    public $modules = [];
 
     public function mount(){
         $this->loadPermissions();
+        $this->modules = \App\Models\Module::orderBy('name')->pluck('name', 'name')->toArray();
     }
 
     // Modal related methods
@@ -103,6 +105,8 @@ class Index extends Component
     #[Layout('layouts.app')]
     public function render()
     {
-        return view('livewire.permission.index');
+        return view('livewire.permission.index', [
+            'modules' => $this->modules,
+        ]);
     }
 }
