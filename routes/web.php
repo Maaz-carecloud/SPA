@@ -78,10 +78,8 @@ use App\Livewire\Class\Index as ClassIndex;
 use App\Livewire\Designation\Index as DesignationIndex;
 use App\Livewire\Activity\Index as ActivityIndex;
 // use App\Livewire\Post\Index as PostIndex;
-// use App\Livewire\User\Index as UserIndex;
 
 // Route::get('/', PostIndex::class);
-// Route::get('/users', UserIndex::class)->name('users.index');
 
 Route::get('/', Login::class)->name('login');
 
