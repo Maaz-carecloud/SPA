@@ -1,4 +1,5 @@
 <div class="d-flex min-vh-100 w-100">
+    @livewire('offline')
     @include('partials.sidebar')
     <div class="content-wrapper" id="contentWrapper">
         @include('partials.header')
