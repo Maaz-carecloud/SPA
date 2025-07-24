@@ -1,6 +1,6 @@
 <x-sections.default>
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Leaves</h3>
+        <h3>All Leaves</h3>
         <button type="button" class="btn theme-filled-btn" data-bs-toggle="modal" data-bs-target="#createModal">
             + Create
         </button>
