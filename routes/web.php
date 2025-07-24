@@ -43,8 +43,6 @@ use App\Livewire\User\Student\Index as StudentIndex;
 use App\Livewire\User\Student\View as StudentView;
 
 use App\Livewire\Leave\Index as LeaveIndex;
-use App\Livewire\Leave\Create as LeaveCreate;
-use App\Livewire\Leave\Edit as LeaveEdit;
 use App\Livewire\Leave\View as LeaveView;
 
 use App\Livewire\Library\Member\Index as LibraryMemberIndex;
@@ -149,8 +147,6 @@ Route::group(['middleware' => ['auth','activity']], function () {
 
     // Leave Management Routes
     Route::get('/leave', LeaveIndex::class)->name('leave.index');
-    Route::get('/leave/create', LeaveCreate::class)->name('leave.create');
-    Route::get('/leave/{id}/edit', LeaveEdit::class)->name('leave.edit');
     Route::get('/leave/{id}/view', LeaveView::class)->name('leave.view');
 
     // Library Management Routes
