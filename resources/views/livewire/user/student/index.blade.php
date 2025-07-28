@@ -10,25 +10,26 @@
         $rows = [];
         if($students && count($students)) {
             foreach($students as $index => $student) {
-                // Siblings: get all students with the same parent_id except current
-                $siblings = $students->where('parent_id', $student->parent_id)
+                // Siblings: get all students with the same parent (father) except current student
+                $siblings = $students->where('student.parent_id', $student->student->parent_id ?? null)
                     ->where('id', '!=', $student->id)
+                    ->whereNotNull('student.parent_id')
                     ->map(function($sibling) {
-                        return e(optional($sibling->user)->name);
+                        return e($sibling->name);
                     })->filter()->implode(', ');
 
                 $rows[] = [
                     $index + 1,
-                    e(optional($student->user)->registration_no),
-                    e(optional($student->user)->name),
-                    $student->parent && $student->parent->user ? e($student->parent->user->name) : 'NA',
-                    e(optional($student->class)->name),
-                    e(optional($student->section)->name),
-                    e(optional($student->user)->address),
-                    $siblings ?: '-',
-                    optional($student->user)->is_active ? 'Active' : 'Inactive',
-                    '<div class="action-items"><span><a @click.prevent="$dispatch(\'edit-mode\', {id: ' . $student->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
-                    . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $student->id . '"><i class="fa fa-trash"></i></a></span></div>'
+                    e($student->registration_no),
+                    e($student->name),
+                    $student->student && $student->student->parent && $student->student->parent->user ? e($student->student->parent->user->name) : 'NA',
+                    e(optional($student->student)->class ? $student->student->class->name : 'NA'),
+                    e(optional($student->student)->section ? $student->student->section->name : 'NA'),
+                    e($student->address),
+                    $siblings ?: 'No siblings',
+                    $student->is_active ? 'Active' : 'Inactive',
+                    '<div class="action-items"><span><a @click.prevent="$dispatch(\'edit-mode\', {id: ' . ($student->student->id ?? $student->id) . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                    . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . ($student->student->id ?? $student->id) . '"><i class="fa fa-trash"></i></a></span></div>'
                 ];
             }
         }
@@ -71,9 +72,9 @@
             <div class="col-md-3">
                 <x-form.input label="Phone" name="phone" id="create-modal-phone" wire:model="phone" placeholder="Enter phone" containerClass="" autocomplete="tel" />
             </div>
-            <div class="col-md-3">
+            {{-- <div class="col-md-3">
                 <x-form.input label="CNIC" name="cnic" id="create-modal-cnic" wire:model="cnic" placeholder="12345-1234567-1" :required="true" containerClass="" pattern="\d{5}-\d{7}-\d{1}" title="CNIC format: 12345-1234567-1" />
-            </div>
+            </div> --}}
             <div class="col-md-3">
                 <x-form.input label="Blood Group" name="blood_group" id="create-modal-blood-group" wire:model="blood_group" placeholder="Enter blood group" containerClass="" />
             </div>

@@ -101,6 +101,11 @@ class User extends Authenticatable
         return $this->hasMany(LeaveRecord::class, 'user_id');
     }
 
+    public function logs()
+    {
+        return $this->hasMany(ActivityLog::class, 'userId');
+    }
+
     // Accessors
     public function getProfilePhotoUrlAttribute()
     {

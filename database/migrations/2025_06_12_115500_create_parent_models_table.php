@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('parents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
+            $table->string('cnic')->unique();
             $table->string('father_profession')->nullable();
             $table->string('mother_name')->nullable();
             $table->string('mother_contact')->nullable();

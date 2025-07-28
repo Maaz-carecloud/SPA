@@ -23,8 +23,7 @@ return new class extends Migration
             $table->string('state')->nullable()->after('country');
             $table->string('city')->nullable()->after('state');
             $table->string('avatar')->nullable()->comment('profile image')->after('city');
-            $table->string('cnic')->unique()->after('avatar');
-            $table->string('blood_group')->nullable()->after('cnic');
+            $table->string('blood_group')->nullable()->after('avatar');
             $table->string('registration_no')->nullable()->after('blood_group');
             $table->tinyInteger('transport_status')->default(0)->after('registration_no');
             $table->unsignedBigInteger('transport_id')->nullable()->after('transport_status');
@@ -42,7 +41,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
                 'username', 'user_type', 'dob', 'gender', 'religion', 'phone', 
-                'address', 'country', 'state', 'city', 'avatar', 'cnic',
+                'address', 'country', 'state', 'city', 'avatar',
                 'blood_group', 'registration_no', 'transport_status', 'transport_id',
                 'is_active', 'created_by', 'updated_by'
             ]);

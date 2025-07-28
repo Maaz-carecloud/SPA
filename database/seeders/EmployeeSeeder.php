@@ -7,20 +7,33 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use App\Models\User;
-use App\Models\Teacher;
+use App\Models\Employee;
 use App\Models\Designation;
 
-class TeacherSeeder extends Seeder
+class EmployeeSeeder extends Seeder
 {
     public function run()
     {
-        $oldTeachers = DB::connection('mysqlold')->table('teacher')->where('active', 1)->get();
+        $oldEmployees = DB::connection('mysqlold')->table('user')->where('active', 1)->get();
 
-        foreach ($oldTeachers as $old) {
+        $dummyCounter = 1;
+        $existingEmails = User::pluck('email')->toArray();
+
+        foreach ($oldEmployees as $old) {
+            $email = trim($old->email);
+            if (empty($email) || in_array($email, $existingEmails)) {
+                // Generate a unique dummy email
+                do {
+                    $email = 'dummy' . $dummyCounter . '@noemail.local';
+                    $dummyCounter++;
+                } while (in_array($email, $existingEmails));
+            }
+            $existingEmails[] = $email;
+
             // Insert into `users` table
             $user = User::create([
                 'name'              => $old->name,
-                'email'             => $old->email,
+                'email'             => $email,
                 'username'          => $old->username,
                 'password'          => Hash::make('BGS12345@'),
                 'dob'               => $old->dob,
@@ -32,36 +45,25 @@ class TeacherSeeder extends Seeder
                 'state'             => null, // Not available in old data
                 'city'              => 'Bagh',
                 'blood_group'       => $old->bloodgroup,
-                'avatar'            => null,
-                'user_type'         => 'teacher',
+                'avatar'            => $old->photo ?? null,
+                'user_type'         => 'employee',
                 'transport_status'  => $old->transport_sts ?? 0,
                 'transport_id'      => $old->transport_id,
-                'registration_no'   => $old->teacher_regno,
                 'is_active'         => $old->active,
                 'created_at'        => Carbon::now(),
                 'updated_at'        => Carbon::now(),
-                'created_by' => 'Super Admin User',
+                'created_by'        => 'Super Admin User',
                 'updated_by'        => null,
             ]);
 
-            // Map designation name to designation_id
-            $designationId = null;
-            if (!empty($old->designation)) {
-                $designation = Designation::where('name', $old->designation)->first();
-                if ($designation) {
-                    $designationId = $designation->id;
-                }
-            }
-
-            // Insert into `teachers` table (only columns that exist)
-            Teacher::create([
+            // Insert into `employees` table (only columns that exist)
+            Employee::create([
                 'user_id'           => $user->id,
-                'designation_id'    => $designationId,
+                'designation_id'    => 42,
                 'cnic'              => $old->cnic,
                 'joining_date'      => $old->jod,
-                'qualification'     => $old->cf_qualification ?? null,
                 'basic_salary'      => $old->basic_sal ?? null,
-                'created_by' => 'Super Admin User',
+                'created_by'        => 'Super Admin User',
                 'updated_by'        => null,
             ]);
         }

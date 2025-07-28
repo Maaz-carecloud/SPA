@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             ProductCategorySeeder::class,
             ProductWarehouseSeeder::class,
             DesignationSeeder::class,
+            EmployeeSeeder::class,
             TeacherSeeder::class,
             ClassSeeder::class,
             SectionSeeder::class,
@@ -26,10 +27,11 @@ class DatabaseSeeder extends Seeder
             ProductSuppliersSeeder::class,
             InventoryProductSeeder::class,
             BookSeeder::class,
-            StudentSeeder::class,
             LibraryMemberSeeder::class,
             IssueSeeder::class,
             FineSeeder::class,
+            ParentSeeder::class,
+            StudentSeeder::class,
         ]);
     }
 }

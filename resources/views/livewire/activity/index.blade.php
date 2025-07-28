@@ -1,6 +1,7 @@
 <x-sections.default>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>Activity Log</h3>
+        <button type="button" class="btn theme-filled-btn" title="Table truncation option for admins" @click.prevent="$dispatch('reset-table')">- RESET</button>
     </div>
     @php
         $columns = ['#', 'Description', 'User', 'Method', 'Route', 'IP Address', 'User Agent', 'Time'];
@@ -9,22 +10,12 @@
             if($activities->count()) {
                 foreach($activities as $index => $activity) {
                     // User
-                    $userType = $activity->userType ?? 'Guest';
-                    $userDetails = $activity->userDetails ?? [];
-                    switch ($userType) {
-                        case 'Registered':
-                            $badgeClass = 'bg-success';
-                            $userName = $userDetails['name'] ?? 'Unknown User';
-                            break;
-                        case 'Crawler':
-                            $badgeClass = 'bg-danger';
-                            $userName = 'Bot/Crawler';
-                            break;
-                        case 'Guest':
-                        default:
-                            $badgeClass = 'bg-warning';
-                            $userName = 'Guest';
-                            break;
+                    if ($activity->user) {
+                        $badgeClass = 'bg-success';
+                        $userName = $activity->user->name;
+                    } else {
+                        $badgeClass = 'bg-warning';
+                        $userName = 'Guest';
                     }
                     $userCell = '<span class="badge ' . $badgeClass . '">' . e($userName) . '</span>';
                     // Method

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('designation_id')->constrained('designations');
+            $table->string('cnic')->unique();
             $table->date('joining_date')->nullable();
             $table->string('qualification')->nullable();
             $table->integer('basic_salary')->nullable();

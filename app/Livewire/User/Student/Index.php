@@ -20,7 +20,7 @@ class Index extends Component
     use WithFileUploads;
 
     // User fields
-    public $name, $email, $username, $password, $user_type = 'student', $dob, $gender, $religion, $phone, $address, $country, $city, $state, $avatar, $cnic, $blood_group, $registration_no, $transport_status, $transport_id, $is_active = 1, $library, $created_by, $updated_by;
+    public $name, $email, $username, $password, $user_type = 'student', $dob, $gender, $religion, $phone, $address, $country, $city, $state, $avatar, $blood_group, $registration_no, $transport_status, $transport_id, $is_active = 1, $library, $created_by, $updated_by;
     // Student fields
     public $parent_id, $admission_date, $class_id, $section_id, $roll_no, $library_status = 0, $hostel_status = 0;
 
@@ -36,7 +36,13 @@ class Index extends Component
     public function mount() { $this->loadStudents(); }
 
     public function loadStudents() {
-        $this->students = Student::with(['user', 'parent.user', 'class', 'section'])
+        $this->students = User::where('user_type', 'student')
+            ->whereHas('student') // Only get users who have student records
+            ->with(['student:id,user_id,parent_id,class_id,section_id,created_at', 
+                   'student.parent.user:id,name',
+                   'student.class:id,name',
+                   'student.section:id,name'])
+            ->select('id', 'name', 'email', 'username', 'phone', 'is_active', 'created_at')
             ->orderByDesc('created_at')
             ->get();
     }
@@ -57,7 +63,6 @@ class Index extends Component
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
             'avatar' => 'nullable|image|max:2048',
-            'cnic' => ['required', 'string', 'max:30', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
             'blood_group' => 'nullable|string|max:10',
             'registration_no' => 'nullable|string|max:50',
             'transport_status' => 'nullable|in:0,1',
@@ -87,7 +92,6 @@ class Index extends Component
             'city' => $this->city,
             'state' => $this->state,
             'avatar' => $avatarPath,
-            'cnic' => $this->cnic,
             'blood_group' => $this->blood_group,
             'registration_no' => $this->registration_no,
             'transport_status' => $this->transport_status,
@@ -170,7 +174,6 @@ class Index extends Component
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
             'avatar' => 'nullable|image|max:2048',
-            'cnic' => ['required', 'string', 'max:30', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
             'blood_group' => 'nullable|string|max:10',
             'registration_no' => 'nullable|string|max:50',
             'transport_status' => 'nullable|in:0,1',
@@ -199,7 +202,6 @@ class Index extends Component
             'city' => $this->city,
             'state' => $this->state,
             'avatar' => $avatarPath,
-            'cnic' => $this->cnic,
             'blood_group' => $this->blood_group,
             'registration_no' => $this->registration_no,
             'transport_status' => $this->transport_status,
@@ -240,7 +242,7 @@ class Index extends Component
     #[On('edit-student-close')]
     public function resetFields() {
         foreach ([
-            'name','email','username','password','dob','gender','religion','phone','address','country','city','state','avatar','cnic','blood_group','registration_no','transport_status','transport_id','is_active','library','parent_id','admission_date','class_id','section_id','roll_no','library_status','hostel_status','getStudent'
+            'name','email','username','password','dob','gender','religion','phone','address','country','city','state','avatar','blood_group','registration_no','transport_status','transport_id','is_active','library','parent_id','admission_date','class_id','section_id','roll_no','library_status','hostel_status','getStudent'
         ] as $field) {
             $this->$field = null;
         }

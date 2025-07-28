@@ -59,6 +59,7 @@ class DesignationSeeder extends Seeder
             'Security Guard',
             'Janitor',
             'Sweeper',
+            'employee',
         ];
 
         foreach ($designations as $designation) {

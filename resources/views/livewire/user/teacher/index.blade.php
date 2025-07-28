@@ -6,17 +6,18 @@
         </button>
     </div>
     @php
-        $columns = ['#', 'User ID', 'Designation ID', 'Joining Date', 'Qualification', 'Basic Salary', 'Action'];
+        $columns = ['#', 'Teacher Name', 'Email', 'Username', 'Phone', 'Gender', 'Status', 'Actions'];
         $rows = [];
         if($teachers && count($teachers)) {
             foreach($teachers as $index => $teacher) {
                 $rows[] = [
                     $index + 1,
-                    e($teacher->user_id),
-                    e($teacher->designation_id),
-                    e($teacher->joining_date),
-                    e($teacher->qualification),
-                    e($teacher->basic_salary),
+                    e(optional($teacher->user)->name),
+                    e(optional($teacher->user)->email),
+                    e(optional($teacher->user)->username),
+                    e(optional($teacher->user)->phone),
+                    e(optional($teacher->user)->gender),
+                    optional($teacher->user)->is_active ? 'Active' : 'Inactive',
                     '<div class="action-items"><span><a @click.prevent="$dispatch(\'edit-mode\', {id: ' . $teacher->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
                     . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $teacher->id . '"><i class="fa fa-trash"></i></a></span></div>'
                 ];
@@ -47,19 +48,13 @@
         <h6 class="mt-4 mb-3 text-theme-primary">Personal Details</h6>
         <div class="row g-3">
             <div class="col-md-3">
-                <x-form.input label="Date of Birth" name="dob" id="create-modal-dob" type="date" wire:model="dob" containerClass="" />
-            </div>
-            <div class="col-md-3">
-                <div>
-                    <x-form.label for="create-modal-gender" :required="false">Gender</x-form.label>
-                    <select id="create-modal-gender" wire:model="gender" class="form-control @error('gender') is-invalid @enderror">
-                        <option value="">Select Gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                    </select>
-                    @error('gender') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                </div>
+                <x-form.select 
+                    label="Gender" 
+                    name="gender" 
+                    :options="['male' => 'Male', 'female' => 'Female', 'other' => 'Other']" 
+                    model="gender" 
+                    placeholder="Select Gender"
+                />
             </div>
             <div class="col-md-3">
                 <x-form.input label="Religion" name="religion" id="create-modal-religion" wire:model="religion" placeholder="Enter religion" containerClass="" />
@@ -95,27 +90,25 @@
                 <x-form.input label="State" name="state" id="create-modal-state" wire:model="state" placeholder="Enter state" containerClass="" />
             </div>
             <div class="col-md-3">
-                <div>
-                    <x-form.label for="create-modal-transport-status" :required="false">Transport Status</x-form.label>
-                    <select id="create-modal-transport-status" wire:model="transport_status" class="form-control @error('transport_status') is-invalid @enderror">
-                        <option value="0">Inactive</option>
-                        <option value="1">Active</option>
-                    </select>
-                    @error('transport_status') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                </div>
+                <x-form.select 
+                    label="Transport Status" 
+                    name="transport_status" 
+                    :options="['0' => 'Inactive', '1' => 'Active']" 
+                    model="transport_status" 
+                    placeholder="Select Status"
+                />
             </div>
             <div class="col-md-3">
                 <x-form.input label="Transport ID" name="transport_id" id="create-modal-transport-id" type="number" wire:model="transport_id" placeholder="Enter transport id" containerClass="" />
             </div>
             <div class="col-md-3">
-                <div>
-                    <x-form.label for="create-modal-is-active" :required="false">Active</x-form.label>
-                    <select id="create-modal-is-active" wire:model="is_active" class="form-control @error('is_active') is-invalid @enderror">
-                        <option value="1">Active</option>
-                        <option value="0">Inactive</option>
-                    </select>
-                    @error('is_active') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                </div>
+                <x-form.select 
+                    label="Active" 
+                    name="is_active" 
+                    :options="['1' => 'Active', '0' => 'Inactive']" 
+                    model="is_active" 
+                    placeholder="Select Status"
+                />
             </div>
             <div class="col-md-6">
                 <x-form.input label="Avatar" name="avatar" id="create-modal-avatar" type="file" wire:model="avatar" containerClass="" />
