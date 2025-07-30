@@ -26,14 +26,61 @@ class Index extends Component
     public $modalAction = 'create-parent';
     public $is_edit = false;
     public $getParent;
-    public $parents;
     public $deleteId;
     public $is_delete = false;
 
-    public function mount() { $this->loadParents(); }
+    public function mount() {
+        // No eager loading, DataTable will fetch via AJAX
+    }
 
-    public function loadParents() {
-        $this->parents = ParentModel::with('user')->orderByDesc('created_at')->get();
+    // Server-side DataTable AJAX handler
+    public function getDataTableRows()
+    {
+        $request = request();
+        $search = $request->input('search.value');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        if ($length == -1) {
+            $length = 1000; // Safe upper limit for 'All'
+        }
+        $query = ParentModel::with('user')
+            ->orderByDesc('created_at');
+
+        if ($search) {
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%")
+                  ->orWhere('username', 'like', "%$search%")
+                  ->orWhere('phone', 'like', "%$search%")
+                  ->orWhere('gender', 'like', "%$search%") ;
+            });
+        }
+
+        $total = $query->count();
+        $parents = $query->skip($start)->take($length)->get();
+
+        $data = [];
+        foreach ($parents as $index => $parent) {
+            $user = $parent->user;
+            $data[] = [
+                $start + $index + 1,
+                e(optional($user)->name),
+                e(optional($user)->email),
+                e(optional($user)->username),
+                e(optional($user)->phone),
+                e(optional($user)->gender),
+                optional($user)->is_active ? 'Active' : 'Inactive',
+                '<div class="action-items"><span><a href="#" onclick="Livewire.dispatch(\'edit-mode\', {id: ' . $parent->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $parent->id . '"><i class="fa fa-trash"></i></a></span></div>'
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 
     #[On('create-parent')]
@@ -104,7 +151,7 @@ class Index extends Component
         $this->dispatch('hide-modal');
         $this->resetFields();
         $this->dispatch('datatable-reinit');
-        $this->loadParents();
+        // Removed loadParents call as it is no longer needed
     }
 
     #[On('edit-mode')]
@@ -207,7 +254,7 @@ class Index extends Component
         $this->dispatch('hide-modal');
         $this->resetFields();
         $this->dispatch('datatable-reinit');
-        $this->loadParents();
+        // Removed loadParents call as it is no longer needed
     }
 
     #[On('delete-record')]
@@ -217,7 +264,7 @@ class Index extends Component
         $parent->delete();
         if ($user) { $user->delete(); }
         $this->dispatch('success', message: 'Parent and user deleted successfully.');
-        $this->loadParents();
+        // Removed loadParents call as it is no longer needed
         $this->dispatch('datatable-reinit');
     }
 
@@ -233,15 +280,13 @@ class Index extends Component
         $this->modalAction = 'create-parent';
         $this->is_edit = false;
         $this->dispatch('hide-modal');
-        $this->loadParents();
+        // Removed loadParents call as it is no longer needed
         $this->dispatch('datatable-reinit');
     }
 
     #[Title('All Parents')]
     #[Layout('layouts.app')]
     public function render() {
-        return view('livewire.user.parent.index', [
-            'parents' => $this->parents,
-        ]);
+        return view('livewire.user.parent.index');
     }
 }

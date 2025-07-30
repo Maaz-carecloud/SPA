@@ -7,34 +7,9 @@
     </div>
     @php
         $columns = ['#', 'Student ID', 'Student Name', 'Parent Name', 'Class', 'Section', 'Address', 'Siblings', 'Status', 'Action'];
-        $rows = [];
-        if($students && count($students)) {
-            foreach($students as $index => $student) {
-                // Siblings: get all students with the same parent (father) except current student
-                $siblings = $students->where('student.parent_id', $student->student->parent_id ?? null)
-                    ->where('id', '!=', $student->id)
-                    ->whereNotNull('student.parent_id')
-                    ->map(function($sibling) {
-                        return e($sibling->name);
-                    })->filter()->implode(', ');
-
-                $rows[] = [
-                    $index + 1,
-                    e($student->registration_no),
-                    e($student->name),
-                    $student->student && $student->student->parent && $student->student->parent->user ? e($student->student->parent->user->name) : 'NA',
-                    e(optional($student->student)->class ? $student->student->class->name : 'NA'),
-                    e(optional($student->student)->section ? $student->student->section->name : 'NA'),
-                    e($student->address),
-                    $siblings ?: 'No siblings',
-                    $student->is_active ? 'Active' : 'Inactive',
-                    '<div class="action-items"><span><a @click.prevent="$dispatch(\'edit-mode\', {id: ' . ($student->student->id ?? $student->id) . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
-                    . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . ($student->student->id ?? $student->id) . '"><i class="fa fa-trash"></i></a></span></div>'
-                ];
-            }
-        }
+        $ajaxUrl = route('datatable.students');
     @endphp
-    <livewire:data-table :columns="$columns" :rows="$rows" table-id="studentsTable" :key="microtime(true)" />
+    <livewire:data-table :columns="$columns" table-id="studentsTable" :ajax-url="$ajaxUrl" :key="microtime(true)" />
     
     <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit">
         <h6 class="mb-3 text-theme-primary">Basic Information</h6>

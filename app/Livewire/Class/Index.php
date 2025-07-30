@@ -12,12 +12,11 @@ use Illuminate\Support\Facades\Auth;
 
 class Index extends Component
 {
-    public $classes;
+    // Remove classes property, DataTable will fetch via AJAX
 
     public $teacherOptions = [];
 
     public function mount(){
-        $this->loadClasses();
         $this->teacherOptions = \App\Models\User::where('user_type', 'teacher')->pluck('name', 'id')->toArray();
     }
 
@@ -92,7 +91,6 @@ class Index extends Component
     public function delete($id) {
         ClassModel::findOrFail($id)->delete();
         $this->dispatch('success', message: 'Class deleted successfully');
-        $this->loadClasses();
         $this->dispatch('datatable-reinit');
     }
 
@@ -104,12 +102,52 @@ class Index extends Component
         $this->modalAction = 'create-class';
         $this->is_edit = false;
         $this->dispatch('hide-modal');
-        $this->loadClasses();
         $this->dispatch('datatable-reinit');
     }
 
-    public function loadClasses(){
-        $this->classes = ClassModel::with('teacher.user')->orderByDesc('created_at')->get();
+    // Remove loadClasses, DataTable will fetch via AJAX
+
+    // Server-side DataTable AJAX handler
+    public function getDataTableRows()
+    {
+        $request = request();
+        $search = $request->input('search.value');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        if ($length == -1) {
+            $length = 1000; // Safe upper limit for 'All'
+        }
+        $query = ClassModel::with('teacher.user')->orderByDesc('created_at');
+
+        if ($search) {
+            $query->where('name', 'like', "%$search%")
+                  ->orWhere('class_numeric', 'like', "%$search%")
+                  ->orWhereHas('teacher.user', function($q) use ($search) {
+                      $q->where('name', 'like', "%$search%") ;
+                  });
+        }
+
+        $total = $query->count();
+        $classes = $query->skip($start)->take($length)->get();
+
+        $data = [];
+        foreach ($classes as $index => $class) {
+            $data[] = [
+                $start + $index + 1,
+                e($class->name),
+                e($class->class_numeric),
+                $class->teacher && $class->teacher->user ? e($class->teacher->user->name) : 'N/A',
+                '<div class="action-items"><span><a href="#" onclick="Livewire.dispatch(\'edit-mode\', {id: ' . $class->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $class->id . '"><i class="fa fa-trash"></i></a></span></div>'
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 
     #[Title('All Classes')]

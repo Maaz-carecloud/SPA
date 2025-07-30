@@ -7,24 +7,9 @@
     </div>
     @php
         $columns = ['#', 'Teacher Name', 'Email', 'Username', 'Phone', 'Gender', 'Status', 'Actions'];
-        $rows = [];
-        if($teachers && count($teachers)) {
-            foreach($teachers as $index => $teacher) {
-                $rows[] = [
-                    $index + 1,
-                    e(optional($teacher->user)->name),
-                    e(optional($teacher->user)->email),
-                    e(optional($teacher->user)->username),
-                    e(optional($teacher->user)->phone),
-                    e(optional($teacher->user)->gender),
-                    optional($teacher->user)->is_active ? 'Active' : 'Inactive',
-                    '<div class="action-items"><span><a @click.prevent="$dispatch(\'edit-mode\', {id: ' . $teacher->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
-                    . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $teacher->id . '"><i class="fa fa-trash"></i></a></span></div>'
-                ];
-            }
-        }
+        $ajaxUrl = route('datatable.teachers');
     @endphp
-    <livewire:data-table :columns="$columns" :rows="$rows" table-id="teachersTable" :key="microtime(true)" />
+    <livewire:data-table :columns="$columns" table-id="teachersTable" :ajax-url="$ajaxUrl" :key="microtime(true)" />
     
     <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit">
         <h6 class="mb-3 text-theme-primary">Basic Information</h6>

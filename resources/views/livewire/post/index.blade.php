@@ -5,25 +5,13 @@
                 + Create
             </button>
         </div>
+
+
         @php
             $columns = ['#', 'Title', 'Description', 'Author', 'Is Published?', 'Action'];
-            $rows = [];
-            if($posts && count($posts)) {
-                foreach($posts as $index => $post) {
-                    $rows[] = [
-                        $index + 1,
-                        e($post->title),
-                        e($post->description),
-                        e($post->author),
-                        $post->is_published == 1 ? 'Yes' : 'No',
-                        '<div class="action-items"><span><a @click.prevent="$dispatch(\'edit-mode\', {id: ' . $post->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
-                        . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $post->id . '"><i class="fa fa-trash"></i></a></span></div>'
-                    ];
-                }
-            }
         @endphp
-        <livewire:data-table :columns="$columns" :rows="$rows" table-id="postsTable" :key="microtime(true)" />
-        
+        <livewire:data-table :columns="$columns" table-id="postsTable" ajax-url="/datatable/posts" :key="microtime(true)" />
+
         <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit">
             <form>
                 <div class="mb-3">

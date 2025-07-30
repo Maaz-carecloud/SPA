@@ -3,6 +3,7 @@
 namespace App\Livewire\Post;
 
 use App\Models\Post;
+use Illuminate\Http\Request;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Rule;
@@ -14,8 +15,6 @@ class Index extends Component
     public $posts;
 
     public function mount(){
-        // $this->posts = Post::orderByDesc('created_at')->get();
-        $this->loadPosts();
     }
 
     //Modal related methods
@@ -86,8 +85,7 @@ class Index extends Component
     #[On('delete-record')]
     public function delete($id) {
         Post::findOrFail($id)->delete();
-        $this->dispatch('success', message: 'User deleted successfully');
-        $this->loadPosts();
+        $this->dispatch('success', message: 'Post deleted successfully');
         $this->dispatch('datatable-reinit');
     }
 
@@ -99,12 +97,7 @@ class Index extends Component
         $this->modalAction = 'create-post';
         $this->is_edit = false;
         $this->dispatch('hide-modal');
-        $this->loadPosts();
         $this->dispatch('datatable-reinit');
-    }
-
-    public function loadPosts(){
-        $this->posts = Post::orderByDesc('created_at')->get();
     }
 
     #[Title('All Posts')]
@@ -112,6 +105,53 @@ class Index extends Component
     public function render()
     {
         return view('livewire.post.index');
+    }
+
+    // Server-side DataTables AJAX handler
+    public function getDataTableRows(Request $request)
+    {
+        $length = $request->input('length');
+        $start = $request->input('start');
+
+        $query = Post::query();
+
+        // Search
+        if (!empty($request['search']['value'])) {
+            $query->where('title', 'like', '%' . $request['search']['value'] . '%');
+        }
+
+        $total = $query->count();
+
+        if ($length == -1) {
+            // Set a reasonable max limit for 'All'
+            $length = $total;
+        }
+
+        $query->skip($start)->take($length);
+
+        $posts = $query->orderBy('created_at', 'desc')->get();
+
+        $rows = [];
+        foreach ($posts as $index => $post) {
+            $rows[] = [
+                $index + 1,
+                e($post->title),
+                e($post->description),
+                e($post->author),
+                $post->is_published == 1 ? 'Yes' : 'No',
+                '<div class="action-items">'
+                . '<span><a href="#" onclick="Livewire.dispatch(\'edit-mode\', {id: ' . $post->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $post->id . '"><i class="fa fa-trash"></i></a></span>'
+                . '</div>',
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request['draw']),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $rows,
+        ]);
     }
 
 }

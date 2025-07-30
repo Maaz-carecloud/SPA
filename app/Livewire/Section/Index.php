@@ -13,10 +13,9 @@ use App\Models\ClassModel;
 
 class Index extends Component
 {
-    public $sections;
+    // Remove sections property, DataTable will fetch via AJAX
 
     public function mount(){
-        $this->loadSections();
         $this->classOptions = ClassModel::orderBy('name')->pluck('name', 'id')->toArray();
     }
 
@@ -101,7 +100,6 @@ class Index extends Component
     public function delete($id) {
         Section::findOrFail($id)->delete();
         $this->dispatch('success', message: 'Section deleted successfully');
-        $this->loadSections();
         $this->dispatch('datatable-reinit');
     }
 
@@ -113,12 +111,57 @@ class Index extends Component
         $this->modalAction = 'create-section';
         $this->is_edit = false;
         $this->dispatch('hide-modal');
-        $this->loadSections();
         $this->dispatch('datatable-reinit');
     }
 
-    public function loadSections(){
-        $this->sections = Section::orderByDesc('created_at')->get();
+    // Remove loadSections, DataTable will fetch via AJAX
+
+    // Server-side DataTable AJAX handler
+    public function getDataTableRows()
+    {
+        $request = request();
+        $search = $request->input('search.value');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        if ($length == -1) {
+            $length = 1000; // Safe upper limit for 'All'
+        }
+        $query = Section::with('class')->orderByDesc('created_at');
+
+        if ($search) {
+            $query->where('name', 'like', "%$search%")
+                  ->orWhere('category', 'like', "%$search%")
+                  ->orWhere('capacity', 'like', "%$search%")
+                  ->orWhere('note', 'like', "%$search%")
+                  ->orWhereHas('class', function($q) use ($search) {
+                      $q->where('name', 'like', "%$search%") ;
+                  });
+        }
+
+        $total = $query->count();
+        $sections = $query->skip($start)->take($length)->get();
+
+        $data = [];
+        foreach ($sections as $index => $section) {
+            $className = $section->class->name ?? ($this->classOptions[$section->class_id] ?? $section->class_id);
+            $data[] = [
+                $start + $index + 1,
+                e($section->name),
+                e($className),
+                e($section->category),
+                e($section->capacity),
+                e($section->note),
+                '<div class="action-items"><span><a href="#" onclick="Livewire.dispatch(\'edit-mode\', {id: ' . $section->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $section->id . '"><i class="fa fa-trash"></i></a></span></div>'
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 
     public $classOptions = [];

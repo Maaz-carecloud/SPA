@@ -7,24 +7,9 @@
     </div>
     @php
         $columns = ['#', 'Parent Name', 'Email', 'Username', 'Phone', 'Gender', 'Status', 'Actions'];
-        $rows = [];
-        if($parents && count($parents)) {
-            foreach($parents as $index => $parent) {
-                $rows[] = [
-                    $index + 1,
-                    e(optional($parent->user)->name),
-                    e(optional($parent->user)->email),
-                    e(optional($parent->user)->username),
-                    e(optional($parent->user)->phone),
-                    e(optional($parent->user)->gender),
-                    optional($parent->user)->is_active ? 'Active' : 'Inactive',
-                    '<div class="action-items"><span><a @click.prevent="$dispatch(\'edit-mode\', {id: ' . $parent->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
-                    . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $parent->id . '"><i class="fa fa-trash"></i></a></span></div>'
-                ];
-            }
-        }
+        $ajaxUrl = route('datatable.parents');
     @endphp
-    <livewire:data-table :columns="$columns" :rows="$rows" table-id="parentsTable" :key="microtime(true)" />
+    <livewire:data-table :columns="$columns" table-id="parentsTable" :ajax-url="$ajaxUrl" :key="microtime(true)" />
     
     <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit">
         <h6 class="mb-3 text-theme-primary">Basic Information</h6>

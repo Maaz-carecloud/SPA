@@ -7,21 +7,9 @@
     </div>
     @php
         $columns = ['#', 'Name', 'Created By', 'Updated By', 'Action'];
-        $rows = [];
-        if($modules && count($modules)) {
-            foreach($modules as $index => $module) {
-                $rows[] = [
-                    $index + 1,
-                    e($module->name),
-                    e($module->created_by),
-                    e($module->updated_by),
-                    '<div class="action-items"><span><a @click.prevent="$dispatch(\'edit-mode\', {id: ' . $module->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
-                    . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $module->id . '"><i class="fa fa-trash"></i></a></span></div>'
-                ];
-            }
-        }
+        $ajaxUrl = route('datatable.modules');
     @endphp
-    <livewire:data-table :columns="$columns" :rows="$rows" table-id="modulesTable" :key="microtime(true)" />
+    <livewire:data-table :columns="$columns" :ajax-url="$ajaxUrl" table-id="modulesTable" :key="microtime(true)" />
     
     <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit">
         <form>

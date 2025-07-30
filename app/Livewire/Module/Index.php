@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\Auth;
 
 class Index extends Component
 {
-    public $modules;
+    // Remove modules property, DataTable will fetch via AJAX
 
     public function mount(){
-        $this->loadModules();
+        // No eager loading, DataTable will fetch via AJAX
     }
 
     // Modal related methods
@@ -79,7 +79,6 @@ class Index extends Component
     public function delete($id) {
         Module::findOrFail($id)->delete();
         $this->dispatch('success', message: 'Module deleted successfully');
-        $this->loadModules();
         $this->dispatch('datatable-reinit');
     }
 
@@ -91,12 +90,52 @@ class Index extends Component
         $this->modalAction = 'create-module';
         $this->is_edit = false;
         $this->dispatch('hide-modal');
-        $this->loadModules();
         $this->dispatch('datatable-reinit');
     }
 
-    public function loadModules(){
-        $this->modules = Module::orderByDesc('created_at')->get();
+    // Remove loadModules, DataTable will fetch via AJAX
+
+    // Server-side DataTable AJAX handler
+    public function getDataTableRows()
+    {
+        $request = request();
+        $search = $request->input('search.value');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        if ($length == -1) {
+            $length = 1000; // Safe upper limit for 'All'
+        }
+        $query = Module::orderByDesc('created_at');
+
+        if ($search) {
+            $query->where('name', 'like', "%$search%")
+                  ->orWhere('created_by', 'like', "%$search%")
+                  ->orWhere('updated_by', 'like', "%$search%") ;
+        }
+
+        $total = $query->count();
+        $modules = $query->skip($start)->take($length)->get();
+
+        $data = [];
+        foreach ($modules as $index => $module) {
+            $actionHtml = '<div class="action-items">'
+                . '<span><a href="#" onclick="Livewire.dispatch(\'edit-mode\', {id: ' . $module->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $module->id . '"><i class="fa fa-trash"></i></a></span></div>';
+            $data[] = [
+                $start + $index + 1,
+                e($module->name),
+                e($module->created_by),
+                e($module->updated_by),
+                $actionHtml
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 
     #[Title('All Modules')]

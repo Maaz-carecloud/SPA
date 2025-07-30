@@ -7,24 +7,9 @@
     </div>
     @php
         $columns = ['#', 'Name', 'Class', 'Category', 'Capacity', 'Note', 'Action'];
-        $rows = [];
-        if($sections && count($sections)) {
-            foreach($sections as $index => $section) {
-                $className = $section->class->name ?? ($classOptions[$section->class_id] ?? $section->class_id);
-                $rows[] = [
-                    $index + 1,
-                    e($section->name),
-                    e($className),
-                    e($section->category),
-                    e($section->capacity),
-                    e($section->note),
-                    '<div class="action-items"><span><a @click.prevent="$dispatch(\'edit-mode\', {id: ' . $section->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
-                    . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $section->id . '"><i class="fa fa-trash"></i></a></span></div>'
-                ];
-            }
-        }
+        $ajaxUrl = route('datatable.sections');
     @endphp
-    <livewire:data-table :columns="$columns" :rows="$rows" table-id="sectionsTable" :key="microtime(true)" />
+    <livewire:data-table :columns="$columns" table-id="sectionsTable" :ajax-url="$ajaxUrl" :key="microtime(true)" />
     
     <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit">
         <form>

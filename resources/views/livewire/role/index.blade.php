@@ -7,21 +7,9 @@
     </div>
     @php
         $columns = ['#', 'Name', 'Permissions', 'Action'];
-        $rows = [];
-        if($roles && count($roles)) {
-            foreach($roles as $index => $role) {
-                $permissionNames = $role->permissions->pluck('name')->implode(', ');
-                $rows[] = [
-                    $index + 1,
-                    e($role->name),
-                    e($permissionNames),
-                    '<div class="action-items"><span><a @click.prevent="$dispatch(\'edit-mode\', {id: ' . $role->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
-                    . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $role->id . '"><i class="fa fa-trash"></i></a></span></div>'
-                ];
-            }
-        }
+        $ajaxUrl = route('datatable.roles');
     @endphp
-    <livewire:data-table :columns="$columns" :rows="$rows" table-id="rolesTable" :key="microtime(true)" />
+    <livewire:data-table :columns="$columns" :ajax-url="$ajaxUrl" table-id="rolesTable" :key="microtime(true)" />
     
     <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit">
         <form>

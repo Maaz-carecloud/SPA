@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\Auth;
 
 class Index extends Component
 {
-    public $roles;
+    // Remove roles property, DataTable will fetch via AJAX
 
     public function mount(){
-        $this->loadRoles();
         $this->permissions = \App\Models\Permission::orderBy('module_name')->get();
+        // No eager loading, DataTable will fetch via AJAX
     }
 
     // Modal related methods
@@ -78,7 +78,6 @@ class Index extends Component
     public function delete($id) {
         Role::findOrFail($id)->delete();
         $this->dispatch('success', message: 'Role deleted successfully');
-        $this->loadRoles();
         $this->dispatch('datatable-reinit');
     }
 
@@ -90,12 +89,53 @@ class Index extends Component
         $this->modalAction = 'create-role';
         $this->is_edit = false;
         $this->dispatch('hide-modal');
-        $this->loadRoles();
         $this->dispatch('datatable-reinit');
     }
 
-    public function loadRoles(){
-        $this->roles = Role::with('permissions')->orderByDesc('created_at')->get();
+    // Remove loadRoles, DataTable will fetch via AJAX
+
+    // Server-side DataTable AJAX handler
+    public function getDataTableRows()
+    {
+        $request = request();
+        $search = $request->input('search.value');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        if ($length == -1) {
+            $length = 1000; // Safe upper limit for 'All'
+        }
+        $query = Role::with('permissions')->orderByDesc('created_at');
+
+        if ($search) {
+            $query->where('name', 'like', "%$search%")
+                  ->orWhereHas('permissions', function($q) use ($search) {
+                      $q->where('name', 'like', "%$search%") ;
+                  });
+        }
+
+        $total = $query->count();
+        $roles = $query->skip($start)->take($length)->get();
+
+        $data = [];
+        foreach ($roles as $index => $role) {
+            $permissionNames = $role->permissions->pluck('name')->implode(', ');
+            $actionHtml = '<div class="action-items">'
+                . '<span><a href="#" @click.prevent="$dispatch(\'edit-mode\', {id: ' . $role->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $role->id . '"><i class="fa fa-trash"></i></a></span></div>';
+            $data[] = [
+                $start + $index + 1,
+                e($role->name),
+                e($permissionNames),
+                $actionHtml
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 
     #[Title('All Roles')]

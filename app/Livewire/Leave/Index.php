@@ -17,7 +17,7 @@ class Index extends Component
 {
     use WithFileUploads;
 
-    public $leaves;
+    // Remove leaves property, DataTable will fetch via AJAX
 
     // Modal related methods
     public $modalTitle = 'Create Leave';
@@ -48,7 +48,6 @@ class Index extends Component
     public $select_all_users = false;
 
     public function mount(){
-        $this->loadLeaves();
         $this->loadData();
         $currentUser = Auth::user();
         $isAdmin = $currentUser->hasRole('admin') ?? $currentUser->user_type === 'admin';
@@ -190,7 +189,6 @@ class Index extends Component
         }
         $this->resetFields();
         $this->dispatch('hide-modal');
-        $this->loadLeaves();
         $this->dispatch('datatable-reinit');
     }
 
@@ -253,7 +251,6 @@ class Index extends Component
         $this->dispatch('success', message: 'Leave updated successfully');
         $this->dispatch('hide-modal');
         $this->resetFields();
-        $this->loadLeaves();
         $this->dispatch('datatable-reinit');
     }
 
@@ -261,7 +258,6 @@ class Index extends Component
     public function delete($id) {
         LeaveRecord::findOrFail($id)->delete();
         $this->dispatch('success', message: 'Leave deleted successfully');
-        $this->loadLeaves();
         $this->dispatch('datatable-reinit');
     }
 
@@ -273,12 +269,62 @@ class Index extends Component
         $this->modalAction = 'create-leave';
         $this->is_edit = false;
         $this->dispatch('hide-modal');
-        $this->loadLeaves();
         $this->dispatch('datatable-reinit');
     }
 
-    public function loadLeaves(){
-        $this->leaves = LeaveRecord::orderByDesc('created_at')->get();
+    // Remove loadLeaves, DataTable will fetch via AJAX
+
+    // Server-side DataTable AJAX handler
+    public function getDataTableRows()
+    {
+        $request = request();
+        $search = $request->input('search.value');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        if ($length == -1) {
+            $length = 1000; // Safe upper limit for 'All'
+        }
+        $query = LeaveRecord::with(['user', 'leaveType'])->orderByDesc('created_at');
+
+        if ($search) {
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('user_type', 'like', "%$search%") ;
+            })
+            ->orWhereHas('leaveType', function($q) use ($search) {
+                $q->where('name', 'like', "%$search%") ;
+            })
+            ->orWhere('leave_reason', 'like', "%$search%")
+            ->orWhere('date_from', 'like', "%$search%")
+            ->orWhere('date_to', 'like', "%$search%") ;
+        }
+
+        $total = $query->count();
+        $leaves = $query->skip($start)->take($length)->get();
+
+        $data = [];
+        foreach ($leaves as $index => $leave) {
+            $actionHtml = '<div class="action-items">'
+                . '<span><a href="#" onclick="Livewire.dispatch(\'edit-mode\', {id: ' . $leave->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $leave->id . '"><i class="fa fa-trash"></i></a></span></div>';
+            $data[] = [
+                $start + $index + 1,
+                e(optional($leave->user)->name),
+                e(optional($leave->leaveType)->name),
+                $leave->leave_reason,
+                $leave->date_from ? e($leave->date_from->format('Y-m-d')) : '',
+                $leave->date_to ? e($leave->date_to->format('Y-m-d')) : '',
+                e($leave->status == 1 ? 'Approved' : 'Pending'),
+                $actionHtml
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 
     #[Title('All Leaves')]

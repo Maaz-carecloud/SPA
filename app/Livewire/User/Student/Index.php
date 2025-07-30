@@ -29,22 +29,78 @@ class Index extends Component
     public $modalAction = 'create-student';
     public $is_edit = false;
     public $getStudent;
-    public $students;
     public $deleteId;
     public $is_delete = false;
 
-    public function mount() { $this->loadStudents(); }
+    public function mount() {
+        // No eager loading, DataTable will fetch via AJAX
+    }
 
-    public function loadStudents() {
-        $this->students = User::where('user_type', 'student')
-            ->whereHas('student') // Only get users who have student records
-            ->with(['student:id,user_id,parent_id,class_id,section_id,created_at', 
-                   'student.parent.user:id,name',
-                   'student.class:id,name',
-                   'student.section:id,name'])
-            ->select('id', 'name', 'email', 'username', 'phone', 'is_active', 'created_at')
-            ->orderByDesc('created_at')
-            ->get();
+    // Server-side DataTable AJAX handler
+    public function getDataTableRows()
+    {
+        $request = request();
+        $search = $request->input('search.value');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        if ($length == -1) {
+            $length = 1000; // Safe upper limit for 'All'
+        }
+        $query = User::where('user_type', 'student')
+            ->whereHas('student')
+            ->with([
+                'student:id,user_id,parent_id,class_id,section_id,created_at',
+                'student.parent.user:id,name',
+                'student.class:id,name',
+                'student.section:id,name'
+            ])
+            ->select('id', 'name', 'registration_no', 'address', 'is_active', 'created_at');
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('registration_no', 'like', "%$search%")
+                  ->orWhere('address', 'like', "%$search%")
+                  ->orWhereHas('student.parent.user', function($q2) use ($search) {
+                      $q2->where('name', 'like', "%$search%") ;
+                  });
+            });
+        }
+
+        $total = $query->count();
+        $students = $query->orderByDesc('created_at')->skip($start)->take($length)->get();
+
+        $data = [];
+        foreach ($students as $index => $student) {
+            // Siblings: get all students with the same parent (father) except current student
+            $siblings = $students->where('student.parent_id', $student->student->parent_id ?? null)
+                ->where('id', '!=', $student->id)
+                ->whereNotNull('student.parent_id')
+                ->map(function($sibling) {
+                    return e($sibling->name);
+                })->filter()->implode(', ');
+
+            $data[] = [
+                $start + $index + 1,
+                e($student->registration_no),
+                e($student->name),
+                $student->student && $student->student->parent && $student->student->parent->user ? e($student->student->parent->user->name) : 'NA',
+                e(optional($student->student)->class ? $student->student->class->name : 'NA'),
+                e(optional($student->student)->section ? $student->student->section->name : 'NA'),
+                e($student->address),
+                $siblings ?: 'No siblings',
+                $student->is_active ? 'Active' : 'Inactive',
+                '<div class="action-items"><span><a href="#" onclick="Livewire.dispatch(\'edit-mode\', {id: ' . ($student->student->id ?? $student->id) . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . ($student->student->id ?? $student->id) . '"><i class="fa fa-trash"></i></a></span></div>'
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 
     #[On('create-student')]
@@ -117,7 +173,7 @@ class Index extends Component
         $this->dispatch('hide-modal');
         $this->resetFields();
         $this->dispatch('datatable-reinit');
-        $this->loadStudents();
+        // Removed loadStudents call as it is no longer needed
     }
 
     #[On('edit-mode')]
@@ -141,7 +197,6 @@ class Index extends Component
         $this->city = $user->city;
         $this->state = $user->state;
         $this->avatar = null;
-        $this->cnic = $user->cnic;
         $this->blood_group = $user->blood_group;
         $this->registration_no = $user->registration_no;
         $this->transport_status = $user->transport_status;
@@ -224,7 +279,7 @@ class Index extends Component
         $this->dispatch('hide-modal');
         $this->resetFields();
         $this->dispatch('datatable-reinit');
-        $this->loadStudents();
+        // Removed loadStudents call as it is no longer needed
     }
 
     #[On('delete-record')]
@@ -234,7 +289,7 @@ class Index extends Component
         $student->delete();
         if ($user) { $user->delete(); }
         $this->dispatch('success', message: 'Student and user deleted successfully.');
-        $this->loadStudents();
+        // Removed loadStudents call as it is no longer needed
         $this->dispatch('datatable-reinit');
     }
 
@@ -250,7 +305,6 @@ class Index extends Component
         $this->modalAction = 'create-student';
         $this->is_edit = false;
         $this->dispatch('hide-modal');
-        $this->loadStudents();
         $this->dispatch('datatable-reinit');
     }
 
@@ -258,7 +312,6 @@ class Index extends Component
     #[Layout('layouts.app')]
     public function render() {
         return view('livewire.user.student.index', [
-            'students' => $this->students,
             'parents' => ParentModel::with('user')->get(),
             'classes' => ClassModel::all(),
             'sections' => Section::all(),

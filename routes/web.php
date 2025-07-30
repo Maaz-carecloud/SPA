@@ -75,33 +75,41 @@ use App\Livewire\Class\Index as ClassIndex;
 
 use App\Livewire\Designation\Index as DesignationIndex;
 use App\Livewire\Activity\Index as ActivityIndex;
-// use App\Livewire\Post\Index as PostIndex;
-
-// Route::get('/', PostIndex::class);
+use App\Livewire\Post\Index as PostIndex;
 
 Route::get('/', Login::class)->name('login');
 
 Route::group(['middleware' => ['auth','activity']], function () {
+    
     Route::get('/logout', function () {
         Auth::logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
         return redirect()->route('login');
     })->name('logout');
-
+    
+    
+    Route::post('/datatable/posts', [PostIndex::class, 'getDataTableRows'])->name('datatable.posts');
+    Route::get('/posts', PostIndex::class)->name('posts');
+    
     Route::get('/dashboard', DashboardIndex::class)->name('dashboard');
-
+    
     // Activity Log Routes (early placement to override LaravelLogger routes)
     Route::get('/activity-log', ActivityIndex::class)->name('activity-log');
+    Route::post('/datatable/activities', [ActivityIndex::class, 'getDataTableRows'])->name('datatable.activities');
 
     Route::get('/teachers', TeacherIndex::class)->name('teachers');
+    Route::post('/datatable/teachers', [TeacherIndex::class, 'getDataTableRows'])->name('datatable.teachers');
     Route::get('/view-teacher/{id}', TeacherView::class)->name('view-teacher');
 
     Route::get('/roles', RoleIndex::class)->name('roles');
+    Route::post('/datatable/roles', [RoleIndex::class, 'getDataTableRows'])->name('datatable.roles');
 
     Route::get('/permissions', PermissionIndex::class)->name('permissions');
+    Route::post('/datatable/permissions', [PermissionIndex::class, 'getDataTableRows'])->name('datatable.permissions');
 
     Route::get('/modules', ModuleIndex::class)->name('modules');
+    Route::post('/datatable/modules', [ModuleIndex::class, 'getDataTableRows'])->name('datatable.modules');
 
     Route::get('/categories', CategoryIndex::class)->name('categories');
 
@@ -131,22 +139,29 @@ Route::group(['middleware' => ['auth','activity']], function () {
     Route::get('/edit-sale/{id}', SaleEdit::class)->name('sales.edit');
 
     Route::get('/students', StudentIndex::class)->name('students');
+    Route::post('/datatable/students', [StudentIndex::class, 'getDataTableRows'])->name('datatable.students');
     Route::get('/view-student/{id}', StudentView::class)->name('view-student');
 
     Route::get('/classes', ClassIndex::class)->name('classes');
+    Route::post('/datatable/classes', [ClassIndex::class, 'getDataTableRows'])->name('datatable.classes');
 
     Route::get('/sections', SectionIndex::class)->name('sections');
+    Route::post('/datatable/sections', [SectionIndex::class, 'getDataTableRows'])->name('datatable.sections');
 
     Route::get('/parents', ParentIndex::class)->name('parents');
+    Route::post('/datatable/parents', [ParentIndex::class, 'getDataTableRows'])->name('datatable.parents');
     Route::get('/view-parent/{id}', ParentView::class)->name('view-parent');
 
     Route::get('/employees', EmployeeIndex::class)->name('employees');
+    Route::post('/datatable/employees', [EmployeeIndex::class, 'getDataTableRows'])->name('datatable.employees');
     Route::get('/view-employee/{id}', EmployeeView::class)->name('view-employee');
 
     Route::get('/designations', DesignationIndex::class)->name('designations');
+    Route::post('/datatable/designations', [DesignationIndex::class, 'getDataTableRows'])->name('datatable.designations');
 
     // Leave Management Routes
     Route::get('/leave', LeaveIndex::class)->name('leave.index');
+    Route::post('/datatable/leaves', [LeaveIndex::class, 'getDataTableRows'])->name('datatable.leaves');
     Route::get('/leave/{id}/view', LeaveView::class)->name('leave.view');
 
     // Library Management Routes

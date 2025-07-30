@@ -27,16 +27,63 @@ class Index extends Component
     public $modalAction = 'create-teacher';
     public $is_edit = false;
     public $getTeacher;
-    public $teachers;
     public $usernameAvailable = true;
     public $cnicAvailable = true;
     public $deleteId;
     public $is_delete = false;
 
-    public function mount() { $this->loadTeachers(); }
+    public function mount() {
+        // No eager loading, DataTable will fetch via AJAX
+    }
 
-    public function loadTeachers() {
-        $this->teachers = Teacher::with('user')->orderByDesc('created_at')->get();
+    // Server-side DataTable AJAX handler
+    public function getDataTableRows()
+    {
+        $request = request();
+        $search = $request->input('search.value');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        if ($length == -1) {
+            $length = 1000; // Safe upper limit for 'All'
+        }
+        $query = Teacher::with('user')
+            ->orderByDesc('created_at');
+
+        if ($search) {
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%")
+                  ->orWhere('username', 'like', "%$search%")
+                  ->orWhere('phone', 'like', "%$search%")
+                  ->orWhere('gender', 'like', "%$search%") ;
+            });
+        }
+
+        $total = $query->count();
+        $teachers = $query->skip($start)->take($length)->get();
+
+        $data = [];
+        foreach ($teachers as $index => $teacher) {
+            $user = $teacher->user;
+            $data[] = [
+                $start + $index + 1,
+                e(optional($user)->name),
+                e(optional($user)->email),
+                e(optional($user)->username),
+                e(optional($user)->phone),
+                e(optional($user)->gender),
+                optional($user)->is_active ? 'Active' : 'Inactive',
+                '<div class="action-items"><span><a href="#" onclick="Livewire.dispatch(\'edit-mode\', {id: ' . $teacher->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $teacher->id . '"><i class="fa fa-trash"></i></a></span></div>'
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 
     #[On('create-teacher')]
@@ -105,7 +152,7 @@ class Index extends Component
         $this->dispatch('hide-modal');
         $this->resetFields();
         $this->dispatch('datatable-reinit');
-        $this->loadTeachers();
+        // Removed loadTeachers call as it is no longer needed
     }
 
     #[On('edit-mode')]
@@ -205,7 +252,7 @@ class Index extends Component
         $this->dispatch('hide-modal');
         $this->resetFields();
         $this->dispatch('datatable-reinit');
-        $this->loadTeachers();
+        // Removed loadTeachers call as it is no longer needed
     }
 
     #[On('delete-record')]
@@ -215,7 +262,7 @@ class Index extends Component
         $teacher->delete();
         if ($user) { $user->delete(); }
         $this->dispatch('success', message: 'Teacher and user deleted successfully.');
-        $this->loadTeachers();
+        // Removed loadTeachers call as it is no longer needed
         $this->dispatch('datatable-reinit');
     }
 
@@ -231,7 +278,7 @@ class Index extends Component
         $this->modalAction = 'create-teacher';
         $this->is_edit = false;
         $this->dispatch('hide-modal');
-        $this->loadTeachers();
+        // Removed loadTeachers call as it is no longer needed
         $this->dispatch('datatable-reinit');
     }
 
@@ -239,7 +286,6 @@ class Index extends Component
     #[Layout('layouts.app')]
     public function render() {
         return view('livewire.user.teacher.index', [
-            'teachers' => $this->teachers,
             'designations' => Designation::all(),
         ]);
     }

@@ -7,28 +7,9 @@
     </div>
     @php
         $columns = ['#', 'Employee', 'Leave Type', 'Reason', 'From', 'To', 'Status', 'Action'];
-        $rows = [];
-        if($leaves && count($leaves)) {
-            foreach($leaves as $index => $leave) {
-                $rows[] = [
-                $index + 1,
-                e(optional($leave->user)->name),
-                e(optional($leave->leaveType)->name),
-                $leave->leave_reason, // Render as raw HTML in the table
-                $leave->date_from ? e($leave->date_from->format('Y-m-d')) : '',
-                $leave->date_to ? e($leave->date_to->format('Y-m-d')) : '',
-                e($leave->status == 1) ? 'Approved' : 'Pending',
-                '<div class="action-items">' .
-                    '<span><a @click.prevent="$dispatch(\'edit-mode\', {id: ' . $leave->id . '})" data-bs-toggle="modal"
-                            data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>' .
-                    '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $leave->id . '"><i
-                                class="fa fa-trash"></i></a></span>' .
-                    '</div>'
-                ];
-            }
-        }
+        $ajaxUrl = route('datatable.leaves');
     @endphp
-    <livewire:data-table :columns="$columns" :rows="$rows" table-id="leavesTable" :key="microtime(true)" render-html-cols="[3]" />
+    <livewire:data-table :columns="$columns" :ajax-url="$ajaxUrl" table-id="leavesTable" :key="microtime(true)" render-html-cols="[3]" />
 
     <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit">
         <form enctype="multipart/form-data">
@@ -174,8 +155,7 @@
                 <!-- Leave Reason -->
                 <div class="col-12">
                     <x-form.ckeditor label="Leave Reason" name="leave_reason" model="leave_reason" required=true
-                        placeholder="Please provide a detailed reason for your leave request..."
-                        class="@error('leave_reason') is-invalid @enderror" />
+                        placeholder="Please provide a detailed reason for your leave request..." />
                     @error('leave_reason')
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

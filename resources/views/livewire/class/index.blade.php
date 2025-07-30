@@ -7,21 +7,9 @@
     </div>
     @php
         $columns = ['#', 'Name', 'Class Numeric', 'Teacher Name', 'Action'];
-        $rows = [];
-        if($classes && count($classes)) {
-            foreach($classes as $index => $class) {
-                $rows[] = [
-                    $index + 1,
-                    e($class->name),
-                    e($class->class_numeric),
-                    $class->teacher && $class->teacher->user ? e($class->teacher->user->name) : 'N/A',
-                    '<div class="action-items"><span><a @click.prevent="$dispatch(\'edit-mode\', {id: ' . $class->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
-                    . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $class->id . '"><i class="fa fa-trash"></i></a></span></div>'
-                ];
-            }
-        }
+        $ajaxUrl = route('datatable.classes');
     @endphp
-    <livewire:data-table :columns="$columns" :rows="$rows" table-id="classesTable" :key="microtime(true)" />
+    <livewire:data-table :columns="$columns" table-id="classesTable" :ajax-url="$ajaxUrl" :key="microtime(true)" />
     
     <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit">
         <form>

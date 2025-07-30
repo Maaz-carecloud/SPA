@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\Auth;
 
 class Index extends Component
 {
-    public $designations;
+    // Remove designations property, DataTable will fetch via AJAX
 
     public function mount(){
-        $this->loadDesignations();
+        // No eager loading, DataTable will fetch via AJAX
     }
 
     // Modal related methods
@@ -79,7 +79,6 @@ class Index extends Component
     public function delete($id) {
         Designation::findOrFail($id)->delete();
         $this->dispatch('success', message: 'Designation deleted successfully');
-        $this->loadDesignations();
         $this->dispatch('datatable-reinit');
     }
 
@@ -91,12 +90,52 @@ class Index extends Component
         $this->modalAction = 'create-designation';
         $this->is_edit = false;
         $this->dispatch('hide-modal');
-        $this->loadDesignations();
         $this->dispatch('datatable-reinit');
     }
 
-    public function loadDesignations(){
-        $this->designations = Designation::orderByDesc('created_at')->get();
+    // Remove loadDesignations, DataTable will fetch via AJAX
+
+    // Server-side DataTable AJAX handler
+    public function getDataTableRows()
+    {
+        $request = request();
+        $search = $request->input('search.value');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        if ($length == -1) {
+            $length = 1000; // Safe upper limit for 'All'
+        }
+        $query = Designation::orderByDesc('created_at');
+
+        if ($search) {
+            $query->where('name', 'like', "%$search%")
+                  ->orWhere('created_by', 'like', "%$search%")
+                  ->orWhere('updated_by', 'like', "%$search%") ;
+        }
+
+        $total = $query->count();
+        $designations = $query->skip($start)->take($length)->get();
+
+        $data = [];
+        foreach ($designations as $index => $designation) {
+            $actionHtml = '<div class="action-items">'
+                . '<span><a href="#" onclick="Livewire.dispatch(\'edit-mode\', {id: ' . $designation->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $designation->id . '"><i class="fa fa-trash"></i></a></span></div>';
+            $data[] = [
+                $start + $index + 1,
+                e($designation->name),
+                e($designation->created_by),
+                e($designation->updated_by),
+                $actionHtml
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 
     #[Title('All Designations')]

@@ -27,14 +27,59 @@ class Index extends Component
     public $modalAction = 'create-employee';
     public $is_edit = false;
     public $getEmployee;
-    public $employees;
     public $deleteId;
     public $is_delete = false;
 
-    public function mount() { $this->loadEmployees(); }
+    public function mount() {
+        // No eager loading, DataTable will fetch via AJAX
+    }
 
-    public function loadEmployees() {
-        $this->employees = Employee::with('user')->orderByDesc('created_at')->get();
+    // Server-side DataTable AJAX handler
+    public function getDataTableRows()
+    {
+        $request = request();
+        $search = $request->input('search.value');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        if ($length == -1) {
+            $length = 1000; // Safe upper limit for 'All'
+        }
+        $query = Employee::with('user')
+            ->orderByDesc('created_at');
+
+        if ($search) {
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%")
+                  ->orWhere('username', 'like', "%$search%")
+                  ->orWhere('phone', 'like', "%$search%") ;
+            });
+        }
+
+        $total = $query->count();
+        $employees = $query->skip($start)->take($length)->get();
+
+        $data = [];
+        foreach ($employees as $index => $employee) {
+            $user = $employee->user;
+            $data[] = [
+                $start + $index + 1,
+                e(optional($user)->name),
+                e(strtolower(optional($user)->email)),
+                e(optional($user)->username),
+                e(optional($user)->phone),
+                optional($user)->is_active ? 'Active' : 'Inactive',
+                '<div class="action-items"><span><a href="#" onclick="Livewire.dispatch(\'edit-mode\', {id: ' . $employee->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $employee->id . '"><i class="fa fa-trash"></i></a></span></div>'
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 
     #[On('create-employee')]
@@ -103,7 +148,7 @@ class Index extends Component
         $this->dispatch('hide-modal');
         $this->resetFields();
         $this->dispatch('datatable-reinit');
-        $this->loadEmployees();
+        // Removed loadEmployees call as it is no longer needed
     }
 
     #[On('edit-mode')]
@@ -203,7 +248,7 @@ class Index extends Component
         $this->dispatch('hide-modal');
         $this->resetFields();
         $this->dispatch('datatable-reinit');
-        $this->loadEmployees();
+        // Removed loadEmployees call as it is no longer needed
     }
 
     #[On('delete-record')]
@@ -213,7 +258,7 @@ class Index extends Component
         $employee->delete();
         if ($user) { $user->delete(); }
         $this->dispatch('success', message: 'Employee and user deleted successfully.');
-        $this->loadEmployees();
+        // Removed loadEmployees call as it is no longer needed
         $this->dispatch('datatable-reinit');
     }
 
@@ -229,7 +274,7 @@ class Index extends Component
         $this->modalAction = 'create-employee';
         $this->is_edit = false;
         $this->dispatch('hide-modal');
-        $this->loadEmployees();
+        // Removed loadEmployees call as it is no longer needed
         $this->dispatch('datatable-reinit');
     }
 
@@ -237,7 +282,6 @@ class Index extends Component
     #[Layout('layouts.app')]
     public function render() {
         return view('livewire.user.employee.index', [
-            'employees' => $this->employees,
             'designations' => Designation::all(),
         ]);
     }

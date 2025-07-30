@@ -12,12 +12,12 @@ use Illuminate\Support\Facades\Auth;
 
 class Index extends Component
 {
-    public $permissions;
+    // Remove permissions property, DataTable will fetch via AJAX
     public $modules = [];
 
     public function mount(){
-        $this->loadPermissions();
         $this->modules = \App\Models\Module::orderBy('name')->pluck('name', 'name')->toArray();
+        // No eager loading, DataTable will fetch via AJAX
     }
 
     // Modal related methods
@@ -81,7 +81,6 @@ class Index extends Component
     public function delete($id) {
         Permission::findOrFail($id)->delete();
         $this->dispatch('success', message: 'Permission deleted successfully');
-        $this->loadPermissions();
         $this->dispatch('datatable-reinit');
     }
 
@@ -93,12 +92,52 @@ class Index extends Component
         $this->modalAction = 'create-permission';
         $this->is_edit = false;
         $this->dispatch('hide-modal');
-        $this->loadPermissions();
         $this->dispatch('datatable-reinit');
     }
 
-    public function loadPermissions(){
-        $this->permissions = Permission::orderByDesc('created_at')->get();
+    // Remove loadPermissions, DataTable will fetch via AJAX
+
+    // Server-side DataTable AJAX handler
+    public function getDataTableRows()
+    {
+        $request = request();
+        $search = $request->input('search.value');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        if ($length == -1) {
+            $length = 1000; // Safe upper limit for 'All'
+        }
+        $query = Permission::orderByDesc('created_at');
+
+        if ($search) {
+            $query->where('name', 'like', "%$search%")
+                  ->orWhere('module_name', 'like', "%$search%")
+                  ->orWhere('guard_name', 'like', "%$search%") ;
+        }
+
+        $total = $query->count();
+        $permissions = $query->skip($start)->take($length)->get();
+
+        $data = [];
+        foreach ($permissions as $index => $permission) {
+            $actionHtml = '<div class="action-items">'
+                . '<span><a href="#" onclick="Livewire.dispatch(\'edit-mode\', {id: ' . $permission->id . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
+                . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . $permission->id . '"><i class="fa fa-trash"></i></a></span></div>';
+            $data[] = [
+                $start + $index + 1,
+                e($permission->name),
+                e($permission->module_name),
+                e($permission->guard_name),
+                $actionHtml
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 
     #[Title('All Permissions')]
