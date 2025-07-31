@@ -106,6 +106,14 @@ class User extends Authenticatable
         return $this->hasMany(ActivityLog::class, 'userId');
     }
 
+    /**
+     * Get all issues for this user.
+     */
+    public function issues()
+    {
+        return $this->hasMany(Issue::class, 'user_id', 'id');
+    }
+
     // Accessors
     public function getProfilePhotoUrlAttribute()
     {

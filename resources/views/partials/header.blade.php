@@ -37,7 +37,7 @@
             fill="black" />
         </svg>
       </span>
-      <p>Announcements</p>
+      <p type="button" data-bs-toggle="modal" data-bs-target="#announcementModal">Announcements</p>
     </div>
     <div class="align-items-center d-flex gap-2 header-card pe-3 ps-3 d-sm-none d-lg-block d-md-block">
       <span>
@@ -78,7 +78,7 @@
           </defs>
         </svg>
       </span>
-      <p>Visit Website</p>
+      <p onclick="window.open('https://bgs.edu.pk', '_blank')" style="cursor:pointer;">Visit Website</p>
     </div>
 
     <div class="dropdown border-left">
@@ -91,18 +91,68 @@
         </div>
         <div class="d-sm-none d-lg-block d-md-block">
           <p class="strong-text">{{ auth()->user()->name }} <i class="fa-solid fa-angle-down ms-3"></i></p>
-          <span class="d-block text-start w-100 light-text">{{ auth()->user()->username }}</span>
+          {{-- <span class="d-block text-start w-100 light-text">{{ auth()->user()->username }}</span> --}}
 
         </div>
 
       </button>
       <ul class="dropdown-menu w-100">
         <li><a class="dropdown-item text-gary" href="#">Profile</a></li>
-        {{-- <li><a class="dropdown-item text-gary" href="{{ route('update-password') }}" wire:navigate>Update
-            Password</a></li> --}}
+        <li><a class="dropdown-item text-gary" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#passwordresetModal">Update
+            Password</a></li>
         <li><a class="dropdown-item text-gary" href="{{ route('logout') }}">Logout</a></li>
       </ul>
     </div>
   </div>
+
+  <x-modal id="passwordresetModal" title="Password Reset" action="Close" :is_edit="false" :is_not_crud="true">
+    <livewire:update-password />
+  </x-modal>
+
+  <!-- Announcement Modal -->
+  <x-modal id="announcementModal" title="Active Announcements" action="Close" :is_edit="false" :is_not_crud="true">
+    <div style="max-height:90vh; overflow-y:auto;">
+      @php
+        $activeAnnouncements = \App\Models\Announcement::where('status', 'active')
+          ->where(function($query) {
+            $now = now();
+            $query->whereNull('expires_at')
+                  ->orWhere('expires_at', '>', $now);
+          })
+          ->orderByDesc('published_at')
+          ->get();
+      @endphp
+      @forelse($activeAnnouncements as $announcement)
+        <div class="mb-4 p-3 border shadow-sm rounded bg-white position-relative announcement-card">
+          <div class="d-flex align-items-center mb-2">
+            <span class="me-2 text-danger"><i class="fa fa-bullhorn fa-lg"></i></span>
+            <h5 class="mb-0 fw-bold fs-6 text-danger">{{ $announcement->title }}</h5>
+            <div class="d-flex gap-3 ms-3">
+              @if($announcement->published_at)
+                <span class="text-success small" style="font-size: 12px" title="Published Date"><i class="fa fa-calendar-alt me-1"></i> {{ $announcement->published_at->format('d M Y') }}</span>
+              @endif
+              @if($announcement->expires_at)
+                <span class="text-danger small" style="font-size: 12px" title="Expiration Date"><i class="fa fa-clock me-1"></i> {{ $announcement->expires_at->format('d M Y') }}</span>
+              @endif
+              <span class="text-warning small" style="font-size: 12px" title="Author"><i class="fa fa-user me-1"></i> {{ $announcement->author }}</span>
+            </div>
+          </div>
+          <div class="mb-2 text-dark announcement-content">{!! nl2br(e($announcement->content)) !!}</div>
+          @if($announcement->link && $announcement->link != '#')
+            <div class="mt-2">
+              <a href="{{ $announcement->link }}" target="_blank" class="btn btn-sm theme-filled-btn px-3">
+                <i class="fa fa-external-link-alt me-1"></i> Read More
+              </a>
+            </div>
+          @endif
+        </div>
+      @empty
+        <div class="text-center text-muted py-5">
+          <i class="fa fa-bullhorn fa-2x mb-2"></i>
+          <div>No active announcements.</div>
+        </div>
+      @endforelse
+    </div>
+  </x-modal>
 
 </div>

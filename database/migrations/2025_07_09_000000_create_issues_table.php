@@ -12,20 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('issues', function (Blueprint $table) {
-            $table->id('issue_id');
-            $table->string('library_id');
-            $table->unsignedBigInteger('library_member_id');
-            $table->unsignedBigInteger('book_id');
-            $table->string('serial_no');
-            $table->date('issue_date');
-            $table->date('due_date');
+            $table->id();
+            $table->foreignId('user_id')->constrained();
+            $table->foreignId('book_id')->constrained();
+            $table->date('issue_date')->default(now());
+            $table->date('due_date')->default(now()->addDays(14));
             $table->date('return_date')->nullable();
             $table->text('note')->nullable();
             $table->timestamps();
-            
-            // Add foreign key constraints
-            $table->foreign('book_id')->references('id')->on('books')->onDelete('cascade');
-            $table->foreign('library_member_id')->references('id')->on('library_members')->onDelete('cascade');
         });
     }
 

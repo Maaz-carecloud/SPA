@@ -35,7 +35,6 @@ class Book extends Model
         return $query->whereRaw('quantity > due_quantity');
     }
 
-   
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {
@@ -43,5 +42,13 @@ class Book extends Model
               ->orWhere('author', 'like', "%{$search}%")
               ->orWhere('subject_code', 'like', "%{$search}%");
         });
+    }
+
+    /**
+     * Get all issues for this book.
+     */
+    public function issues()
+    {
+        return $this->hasMany(Issue::class, 'book_id', 'id');
     }
 }

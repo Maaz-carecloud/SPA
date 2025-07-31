@@ -88,7 +88,7 @@ class Index extends Component
                 e(optional($student->student)->class ? $student->student->class->name : 'NA'),
                 e(optional($student->student)->section ? $student->student->section->name : 'NA'),
                 e($student->address),
-                $siblings ?: 'No siblings',
+                $siblings ?: '',
                 $student->is_active ? 'Active' : 'Inactive',
                 '<div class="action-items"><span><a href="#" onclick="Livewire.dispatch(\'edit-mode\', {id: ' . ($student->student->id ?? $student->id) . '})" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-edit"></i></a></span>'
                 . '<span><a href="javascript:void(0)" class="delete-swal" data-id="' . ($student->student->id ?? $student->id) . '"><i class="fa fa-trash"></i></a></span></div>'

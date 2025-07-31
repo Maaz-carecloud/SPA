@@ -14,7 +14,7 @@ class Fine extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'issue_id',
+        'id',
         'amount',
         'reason',
         'status',
@@ -39,22 +39,6 @@ class Fine extends Model
     public function issue(): BelongsTo
     {
         return $this->belongsTo(Issue::class, 'issue_id', 'issue_id');
-    }
-
-    /**
-     * Get the user who added this fine.
-     */
-    public function addedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'added_by');
-    }
-
-    /**
-     * Get the user who processed the payment.
-     */
-    public function paidBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'paid_by');
     }
 
     /**

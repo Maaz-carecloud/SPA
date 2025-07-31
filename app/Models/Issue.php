@@ -17,7 +17,7 @@ class Issue extends Model
     protected $fillable = [
         'library_id',
         'book_id',
-        'library_member_id',
+        'user_id',
         'serial_no',
         'issue_date',
         'due_date',
@@ -42,9 +42,9 @@ class Issue extends Model
     /**
      * Get the library member who issued the book.
      */
-    public function libraryMember(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(LibraryMember::class, 'library_member_id', 'id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
@@ -52,7 +52,7 @@ class Issue extends Model
      */
     public function fines()
     {
-        return $this->hasMany(Fine::class, 'issue_id', 'issue_id');
+        return $this->hasMany(Fine::class, 'issue_id');
     }
 
     /**

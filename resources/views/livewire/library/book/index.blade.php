@@ -1,166 +1,57 @@
-<div>
-    <!-- Page Header -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-0">
-                <i class="fas fa-book text-primary me-2"></i>
-                Library Books
-            </h4>
-            <nav aria-label="breadcrumb" class="mt-2">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('dashboard') }}" wire:navigate class="text-decoration-none">
-                            <i class="fas fa-home"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="#" class="text-decoration-none">Library</a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">Books</li>
-                </ol>
-            </nav>
-        </div>
-        <div>
-            <a href="{{ route('library.books.create') }}" wire:navigate class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Add New Book
-            </a>
-        </div>
+<x-sections.default>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Library Books</h3>
+        <button type="button" class="btn theme-filled-btn" data-bs-toggle="modal" data-bs-target="#createModal">
+            <i class="fas fa-plus me-2"></i>Add New Book
+        </button>
     </div>
+    @php
+        $columns = ['S.No', 'Book Title', 'Subject', 'Author', 'Price', 'Stock', 'Rack', 'Actions'];
+        $ajaxUrl = route('datatable.library.books');
+    @endphp
+    <livewire:data-table :columns="$columns" :ajax-url="$ajaxUrl" table-id="books_table" :key="microtime(true)" />
 
-    <!-- Search and Filter Section -->
-    <div class="bgs-card shadow-sm mb-4">
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <span class="input-group-text bg-light">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input 
-                            type="text" 
-                            class="form-control" 
-                            placeholder="Search books by title, author, or subject..." 
-                            wire:model.live="search"
-                        >
-                    </div>
+    <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit">
+        <form>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">Book Title <span class="text-danger">*</span></label>
+                    <input type="text" wire:model="name" class="form-control @error('name') is-invalid @enderror" id="name" placeholder="Enter book title">
+                    @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
-                <div class="col-md-3">
-                    <select class="form-select" wire:model.live="subject_filter">
-                        <option value="">All Subjects</option>
-                        <option value="Math">Mathematics</option>
-                        <option value="Science">Science</option>
-                        <option value="English">English</option>
-                        <option value="History">History</option>
-                        <option value="Geography">Geography</option>
-                    </select>
+                <div class="col-md-6 mb-3">
+                    <label for="subject_code" class="form-label">Subject Code <span class="text-danger">*</span></label>
+                    <input type="text" wire:model="subject_code" class="form-control @error('subject_code') is-invalid @enderror" id="subject_code" placeholder="Enter subject code">
+                    @error('subject_code')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
-                <div class="col-md-3">
-                    <select class="form-select" wire:model.live="availability_filter">
-                        <option value="">All Books</option>
-                        <option value="available">Available</option>
-                        <option value="out_of_stock">Out of Stock</option>
-                    </select>
+                <div class="col-md-6 mb-3">
+                    <label for="author" class="form-label">Author <span class="text-danger">*</span></label>
+                    <input type="text" wire:model="author" class="form-control @error('author') is-invalid @enderror" id="author" placeholder="Enter author name">
+                    @error('author')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
-            </div>
-        </div>
-    </div>
-    <!-- Books Table -->
-    <div class="bgs-card shadow-sm">
-        <div class="card-header bg-white">
-            <div class="d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">
-                    <i class="fas fa-list me-2"></i>
-                    Books List ({{ $books->total() }} total)
-                </h6>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-secondary" wire:click="export">
-                        <i class="fas fa-download me-1"></i>Export
-                    </button>
+                <div class="col-md-6 mb-3">
+                    <label for="price" class="form-label">Price (Rs.) <span class="text-danger">*</span></label>
+                    <input type="number" wire:model="price" class="form-control @error('price') is-invalid @enderror" id="price" placeholder="Enter price" min="1">
+                    @error('price')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="quantity" class="form-label">Total Quantity <span class="text-danger">*</span></label>
+                    <input type="number" wire:model="quantity" class="form-control @error('quantity') is-invalid @enderror" id="quantity" placeholder="Enter total quantity" min="1">
+                    @error('quantity')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="due_quantity" class="form-label">Due Quantity <span class="text-danger">*</span></label>
+                    <input type="number" wire:model="due_quantity" class="form-control @error('due_quantity') is-invalid @enderror" id="due_quantity" placeholder="Enter due quantity" min="0">
+                    @error('due_quantity')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <div class="form-text">Number of books currently issued to students</div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label for="rack" class="form-label">Rack Location <span class="text-danger">*</span></label>
+                    <input type="text" wire:model="rack" class="form-control @error('rack') is-invalid @enderror" id="rack" placeholder="Enter rack location (e.g., A-1-001)">
+                    @error('rack')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <div class="form-text">Physical location of the book in the library</div>
                 </div>
             </div>
-        </div>
-        <div class="card-body p-0">
-            <x-data-table
-                :headers="['S.No', 'Book Title', 'Subject', 'Author', 'Price', 'Stock', 'Rack', 'Actions']"
-                :items="$books"
-                tableId="books-table"
-                :showPagination="false"
-                :showPerPageFilter="false"
-                :showSearch="false"
-                :showExport="false"
-            >
-                @foreach($books as $index => $book)
-                    <tr>
-                        <td>{{ $books->firstItem() + $index }}</td>
-                        <td>
-                            <div class="fw-medium">{{ $book->name }}</div>
-                            @if($book->edition)
-                                <small class="text-muted">{{ $book->edition }} Edition</small>
-                            @endif
-                        </td>
-                        <td>
-                            <span class="badge bg-info">{{ $book->subject_code }}</span>
-                        </td>
-                        <td>{{ $book->author }}</td>
-                        <td>
-                            <strong class="text-success">Rs. {{ number_format($book->price) }}</strong>
-                        </td>
-                        <td>
-                            <?php echo $book->available_quantity; ?>
-                            <span class="badge bg-{{ $book->available_quantity > 0 ? 'success' : 'danger' }}">
-                                {{ $book->available_quantity }}/{{ $book->quantity }}
-                            </span>
-                            @if($book->available_quantity == 0)
-                                <br><small class="text-danger">Out of Stock</small>
-                            @endif
-                        </td>
-                        <td>
-                            <span class="badge bg-secondary">{{ $book->rack }}</span>
-                        </td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <a href="{{ route('library.books.view', $book->id) }}" 
-                                   wire:navigate
-                                   class="btn btn-sm btn-info"
-                                   title="View Details">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{{ route('library.books.edit', $book->id) }}" 
-                                   wire:navigate
-                                   class="btn btn-sm btn-warning"
-                                   title="Edit Book">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button wire:click="delete({{ $book->id }})" 
-                                        class="btn btn-sm btn-danger"
-                                        title="Delete Book"
-                                        onclick="return confirm('Are you sure you want to delete this book?\n\nThis action cannot be undone and all associated data will be permanently removed.')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                @endforeach
-            </x-data-table>
-        </div>
-        @if($books->hasPages())
-            <div class="card-footer bg-white">
-                {{ $books->links() }}
-            </div>
-        @endif
-    </div>
-
-    @if($books->isEmpty() && !$search)
-        <div class="text-center py-5">
-            <div class="text-muted">
-                <i class="fas fa-book fa-3x mb-3"></i>
-                <h5>No Books Available</h5>
-                <p>Start building your library by adding your first book.</p>
-                <a href="{{ route('library.books.create') }}" wire:navigate class="btn btn-primary">
-                    <i class="fas fa-plus me-2"></i>Add First Book
-                </a>
-            </div>
-        </div>
-    @endif
-    
-</div>
+        </form>
+    </x-modal>
+</x-sections.default>

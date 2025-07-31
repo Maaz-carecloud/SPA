@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('fines', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('issue_id');
+            $table->foreignId('issue_id')->constrained();
             $table->decimal('amount', 8, 2);
             $table->string('reason')->default('Overdue fine');
             $table->enum('status', ['pending', 'paid', 'waived'])->default('pending');
@@ -21,14 +21,9 @@ return new class extends Migration
             $table->date('paid_date')->nullable();
             $table->decimal('paid_amount', 8, 2)->nullable();
             $table->text('payment_note')->nullable();
-            $table->unsignedBigInteger('added_by')->nullable(); // User who added the fine
-            $table->unsignedBigInteger('paid_by')->nullable(); // User who processed payment
+            $table->string('added_by')->nullable(); // User who added the fine
+            $table->string('paid_by')->nullable(); // User who processed payment
             $table->timestamps();
-            
-            // Foreign key constraints
-            $table->foreign('issue_id')->references('issue_id')->on('issues')->onDelete('cascade');
-            $table->foreign('added_by')->references('id')->on('users')->onDelete('set null');
-            $table->foreign('paid_by')->references('id')->on('users')->onDelete('set null');
             
             // Indexes for better performance
             $table->index(['issue_id', 'status']);

@@ -28,9 +28,6 @@ class DatabaseSeeder extends Seeder
             ProductSuppliersSeeder::class,
             InventoryProductSeeder::class,
             BookSeeder::class,
-            LibraryMemberSeeder::class,
-            IssueSeeder::class,
-            FineSeeder::class,
             ParentSeeder::class,
             StudentSeeder::class,
         ]);

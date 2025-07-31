@@ -45,11 +45,6 @@ use App\Livewire\User\Student\View as StudentView;
 use App\Livewire\Leave\Index as LeaveIndex;
 use App\Livewire\Leave\View as LeaveView;
 
-use App\Livewire\Library\Member\Index as LibraryMemberIndex;
-use App\Livewire\Library\Member\Create as LibraryMemberCreate;
-use App\Livewire\Library\Member\Edit as LibraryMemberEdit;
-use App\Livewire\Library\Member\View as LibraryMemberView;
-
 use App\Livewire\Library\Book\Index as BookIndex;
 use App\Livewire\Library\Book\Create as BookCreate;
 use App\Livewire\Library\Book\Edit as BookEdit;
@@ -75,12 +70,13 @@ use App\Livewire\Class\Index as ClassIndex;
 
 use App\Livewire\Designation\Index as DesignationIndex;
 use App\Livewire\Activity\Index as ActivityIndex;
-use App\Livewire\Post\Index as PostIndex;
+
+use App\Livewire\Announcement\Index as AnnouncementIndex;
+// use App\Livewire\Post\Index as PostIndex;
 
 Route::get('/', Login::class)->name('login');
 
-Route::group(['middleware' => ['auth','activity']], function () {
-    
+Route::group(['middleware' => ['web','auth','activity']], function () {
     Route::get('/logout', function () {
         Auth::logout();
         request()->session()->invalidate();
@@ -89,8 +85,8 @@ Route::group(['middleware' => ['auth','activity']], function () {
     })->name('logout');
     
     
-    Route::post('/datatable/posts', [PostIndex::class, 'getDataTableRows'])->name('datatable.posts');
-    Route::get('/posts', PostIndex::class)->name('posts');
+    // Route::post('/datatable/posts', [PostIndex::class, 'getDataTableRows'])->name('datatable.posts');
+    // Route::get('/posts', PostIndex::class)->name('posts');
     
     Route::get('/dashboard', DashboardIndex::class)->name('dashboard');
     
@@ -112,6 +108,9 @@ Route::group(['middleware' => ['auth','activity']], function () {
     Route::post('/datatable/modules', [ModuleIndex::class, 'getDataTableRows'])->name('datatable.modules');
 
     Route::get('/categories', CategoryIndex::class)->name('categories');
+
+    Route::get('/announcements', AnnouncementIndex::class)->name('announcements');
+    Route::post('/datatable/announcements', [AnnouncementIndex::class, 'getDataTableRows'])->name('datatable.announcements');
 
     Route::get('/products', ProductIndex::class)->name('products');
     Route::get('/add-product', ProductCreate::class)->name('add-product');
@@ -164,14 +163,9 @@ Route::group(['middleware' => ['auth','activity']], function () {
     Route::post('/datatable/leaves', [LeaveIndex::class, 'getDataTableRows'])->name('datatable.leaves');
     Route::get('/leave/{id}/view', LeaveView::class)->name('leave.view');
 
-    // Library Management Routes
-    Route::get('/library/members', LibraryMemberIndex::class)->name('library.members');
-    Route::get('/library/member/create', LibraryMemberCreate::class)->name('library.member.create');
-    Route::get('/library/member/edit', LibraryMemberEdit::class)->name('library.member.edit');
-    Route::get('/library/member/view', LibraryMemberView::class)->name('library.member.view');
-
     // Books Management Routes
     Route::get('/library/books', BookIndex::class)->name('library.books.index');
+    Route::post('/datatable/library/books', [BookIndex::class, 'getDataTableRows'])->name('datatable.library.books');
     Route::get('/library/books/create', BookCreate::class)->name('library.books.create');
     Route::get('/library/books/{id}/edit', BookEdit::class)->name('library.books.edit');
     Route::get('/library/books/{id}/view', BookView::class)->name('library.books.view');

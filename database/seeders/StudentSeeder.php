@@ -74,7 +74,6 @@ class StudentSeeder extends Seeder
                 'transport_status'  => $old->transport_sts ?? 0,
                 'transport_id'      => $old->transport_id,
                 'is_active'         => $old->active,
-                'library'           => $old->library ?? 0,
                 'created_at'        => Carbon::now(),
                 'updated_at'        => Carbon::now(),
                 'created_by'        => 'Super Admin User',
