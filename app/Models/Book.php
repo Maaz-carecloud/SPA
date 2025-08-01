@@ -51,4 +51,38 @@ class Book extends Model
     {
         return $this->hasMany(Issue::class, 'book_id', 'id');
     }
+
+    /**
+     * Issue a book (increase due_quantity).
+     */
+    public function issueBook(): bool
+    {
+        if ($this->available_quantity > 0) {
+            $this->increment('due_quantity');
+            $this->refresh(); // Refresh to get updated values
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Return a book (decrease due_quantity).
+     */
+    public function returnBook(): bool
+    {
+        if ($this->due_quantity > 0) {
+            $this->decrement('due_quantity');
+            $this->refresh(); // Refresh to get updated values
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if book is available for issuing.
+     */
+    public function isAvailable(): bool
+    {
+        return $this->available_quantity > 0;
+    }
 }

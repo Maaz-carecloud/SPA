@@ -5,24 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class Issue extends Model
 {
     use HasFactory;
 
-    protected $table = 'issues';
-    protected $primaryKey = 'issue_id';
-
     protected $fillable = [
-        'library_id',
-        'book_id',
         'user_id',
-        'serial_no',
+        'book_id',
         'issue_date',
         'due_date',
         'return_date',
-        'note',
+        'notes',
+        'status',
     ];
 
     protected $casts = [
@@ -36,15 +33,15 @@ class Issue extends Model
      */
     public function book(): BelongsTo
     {
-        return $this->belongsTo(Book::class, 'book_id');
+        return $this->belongsTo(Book::class);
     }
 
     /**
-     * Get the library member who issued the book.
+     * Get the user who issued the book.
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
     /**
@@ -52,7 +49,7 @@ class Issue extends Model
      */
     public function fines()
     {
-        return $this->hasMany(Fine::class, 'issue_id');
+        return $this->hasMany(Fine::class, 'issue_id', 'id');
     }
 
     /**
@@ -60,7 +57,7 @@ class Issue extends Model
      */
     public function scopeActive($query)
     {
-        return $query->whereNull('return_date');
+        return $query->where('status', 'issued');
     }
 
     /**
@@ -68,7 +65,7 @@ class Issue extends Model
      */
     public function scopeReturned($query)
     {
-        return $query->whereNotNull('return_date');
+        return $query->where('status', 'returned');
     }
 
     /**
@@ -76,8 +73,11 @@ class Issue extends Model
      */
     public function scopeOverdue($query)
     {
-        return $query->where('due_date', '<', now())
-                    ->whereNull('return_date');
+        return $query->where('status', 'overdue')
+                    ->orWhere(function($q) {
+                        $q->where('due_date', '<', now())
+                          ->where('status', 'issued');
+                    });
     }
 
     /**
@@ -85,7 +85,7 @@ class Issue extends Model
      */
     public function getIsOverdueAttribute(): bool
     {
-        return $this->due_date < now() && is_null($this->return_date);
+        return $this->due_date < now() && $this->status !== 'returned';
     }
 
     /**
@@ -105,53 +105,93 @@ class Issue extends Model
      */
     public function getIsReturnedAttribute(): bool
     {
-        return !is_null($this->return_date);
+        return $this->status === 'returned';
     }
 
     /**
-     * Generate next issue ID.
-     */
-    public static function generateIssueId(): string
-    {
-        $lastIssue = static::orderBy('issue_id', 'desc')->first();
-        $nextNumber = $lastIssue ? (int) substr($lastIssue->library_id, 3) + 1 : 1;
-        
-        return 'LIB' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
-    }
-
-    /**
-     * Scope for searching issues.
-     */
-    public function scopeSearch($query, $search)
-    {
-        return $query->where(function ($q) use ($search) {
-            $q->where('library_id', 'like', "%{$search}%")
-              ->orWhere('serial_no', 'like', "%{$search}%")
-              ->orWhere('note', 'like', "%{$search}%")
-              ->orWhereHas('book', function ($bookQuery) use ($search) {
-                  $bookQuery->where('name', 'like', "%{$search}%")
-                           ->orWhere('author', 'like', "%{$search}%")
-                           ->orWhere('subject_code', 'like', "%{$search}%");
-              });
-        });
-    }
-
-    /**
-     * Boot method to auto-generate Library ID.
+     * Auto-update status based on dates
      */
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($issue) {
-            if (empty($issue->library_id)) {
-                $issue->library_id = static::generateIssueId();
-            }
-            
+            // Only set defaults if not already provided
             if (empty($issue->issue_date)) {
                 $issue->issue_date = now();
             }
+            
+            if (empty($issue->due_date)) {
+                // If issue_date is set, calculate from it, otherwise use today + 14 days
+                $issueDate = $issue->issue_date;
+                if (is_string($issueDate)) {
+                    $issueDate = Carbon::parse($issueDate);
+                }
+                $baseDate = $issueDate ?: now();
+                $issue->due_date = $baseDate->copy()->addDays(14);
+            }
+            
+            if (empty($issue->status)) {
+                $issue->status = 'issued';
+            }
         });
+
+        static::created(function ($issue) {
+            // Update book stock when issue is created
+            if ($issue->book && $issue->status === 'issued') {
+                $issue->book->issueBook();
+            }
+        });
+
+        static::updating(function ($issue) {
+            // Auto-update status when return_date is set
+            if ($issue->return_date && $issue->status !== 'returned') {
+                $issue->status = 'returned';
+            }
+            
+            // Auto-update status when overdue
+            if ($issue->due_date < now() && $issue->status === 'issued') {
+                $issue->status = 'overdue';
+            }
+        });
+
+        static::updated(function ($issue) {
+            // Update book stock when issue status changes to returned
+            // Note: We also handle this explicitly in returnBook() method for reliability
+            if ($issue->wasChanged('status') && $issue->status === 'returned') {
+                if ($issue->book) {
+                    $issue->book->returnBook();
+                }
+            }
+        });
+    }
+
+    /**
+     * Calculate fine amount based on overdue days.
+     */
+    public function calculateFineAmount(): float
+    {
+        if (!$this->is_overdue) {
+            return 0;
+        }
+        
+        return $this->days_overdue * 10; // Rs. 10 per day
+    }
+
+    /**
+     * Alias for calculateFineAmount() for convenience.
+     */
+    public function calculateFine(): float
+    {
+        return $this->calculateFineAmount();
+    }
+
+    /**
+     * Get days overdue for fine calculation.
+     */
+    public function getDaysOverdue(): int
+    {
+        return $this->days_overdue;
     }
 
     /**
@@ -171,14 +211,6 @@ class Issue extends Model
     }
 
     /**
-     * Get total paid fine amount for this issue.
-     */
-    public function getPaidFineAmountAttribute(): float
-    {
-        return $this->fines()->where('status', 'paid')->sum('paid_amount');
-    }
-
-    /**
      * Check if this issue has any pending fines.
      */
     public function getHasPendingFinesAttribute(): bool
@@ -189,14 +221,54 @@ class Issue extends Model
     /**
      * Add a fine to this issue.
      */
-    public function addFine(float $amount, string $reason = 'Overdue fine', int $addedBy = null): Fine
+    public function addFine(float $amount, string $reason = 'Overdue fine', ?string $addedBy = null): Fine
     {
         return $this->fines()->create([
             'amount' => $amount,
             'reason' => $reason,
             'status' => 'pending',
             'fine_date' => now()->toDateString(),
-            'added_by' => $addedBy,
+            'added_by' => $addedBy ?? Auth::user()->name ?? 'System',
         ]);
+    }
+
+    /**
+     * Return the book and calculate fine if overdue.
+     */
+    public function returnBook(?\Carbon\Carbon $returnDate = null, ?string $notes = null): array
+    {
+        $returnDate = $returnDate ?? now();
+        $returnedBy = Auth::user()->name ?? 'System';
+        
+        // Update issue with return date (stock will be updated by model event)
+        $this->update([
+            'return_date' => $returnDate->toDateString(),
+            'status' => 'returned',
+            'notes' => $notes ? ($this->notes ? $this->notes . "\n\nReturn Notes: " . $notes : "Return Notes: " . $notes) : $this->notes
+        ]);
+
+        $fineAmount = 0;
+        $message = 'Book returned successfully.';
+
+        // Calculate and add fine if overdue
+        if ($returnDate->gt($this->due_date)) {
+            $overdueDays = $this->due_date->diffInDays($returnDate);
+            $fineAmount = $overdueDays * 10; // Rs. 10 per day
+
+            $this->addFine(
+                $fineAmount,
+                "Overdue fine: {$overdueDays} days late",
+                $returnedBy
+            );
+
+            $message = "Book returned with {$overdueDays} days late.";
+        }
+
+        return [
+            'success' => true,
+            'message' => $message,
+            'fine_amount' => $fineAmount,
+            'overdue_days' => $returnDate->gt($this->due_date) ? $this->due_date->diffInDays($returnDate) : 0
+        ];
     }
 }

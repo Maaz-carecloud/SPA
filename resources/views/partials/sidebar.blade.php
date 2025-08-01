@@ -386,13 +386,15 @@
           </button>
         </h2>
         <div id="collapseLibrary"
-          class="accordion-collapse collapse {{ request()->is(['library/issues*', 'library/books*']) ? 'show' : '' }}"
+          class="accordion-collapse collapse {{ request()->is(['library/issues*', 'library/books*', 'library/fines*']) ? 'show' : '' }}"
           data-bs-parent="#accordionLibrary">
           <ul class=" custom-dropdown-menu pb-0">
             <li class=""><a class=" nav-link sidebar-item " href="{{ route('library.books.index') }}"
                 wire:navigate><span class="arc sub-menu">Books</span></a></li>
             <li class=""><a class=" nav-link sidebar-item " href="{{ route('library.issues.index') }}"
                 wire:navigate><span class="arc sub-menu">Issues</span></a></li>
+            <li class=""><a class=" nav-link sidebar-item " href="{{ route('library.fines.index') }}"
+                wire:navigate><span class="arc sub-menu">Fines</span></a></li>
             {{-- <li class=""><a class=" nav-link sidebar-item " href="#"><span class="arc sub-menu">E-Books</span></a>
             </li> --}}
           </ul>

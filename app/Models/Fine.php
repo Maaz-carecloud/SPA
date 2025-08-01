@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 class Fine extends Model
 {
@@ -14,7 +15,7 @@ class Fine extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'id',
+        'issue_id',
         'amount',
         'reason',
         'status',
@@ -38,7 +39,7 @@ class Fine extends Model
      */
     public function issue(): BelongsTo
     {
-        return $this->belongsTo(Issue::class, 'issue_id', 'issue_id');
+        return $this->belongsTo(Issue::class, 'issue_id', 'id');
     }
 
     /**
@@ -92,27 +93,27 @@ class Fine extends Model
     /**
      * Mark the fine as paid.
      */
-    public function markAsPaid(float $amount = null, string $note = null, int $paidBy = null): bool
+    public function markAsPaid(float $amount = null, string $note = null): bool
     {
         return $this->update([
             'status' => 'paid',
             'paid_date' => now()->toDateString(),
             'paid_amount' => $amount ?? $this->amount,
             'payment_note' => $note,
-            'paid_by' => $paidBy,
+            'paid_by' => Auth::user()->name ?? 'System',
         ]);
     }
 
     /**
      * Mark the fine as waived.
      */
-    public function markAsWaived(string $note = null, int $waivedBy = null): bool
+    public function markAsWaived(string $note = null): bool
     {
         return $this->update([
             'status' => 'waived',
             'paid_date' => now()->toDateString(),
             'payment_note' => $note,
-            'paid_by' => $waivedBy,
+            'paid_by' => Auth::user()->name ?? 'System',
         ]);
     }
 

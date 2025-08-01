@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('issues', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained();
-            $table->foreignId('book_id')->constrained();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('book_id')->constrained('books')->onDelete('cascade');
             $table->date('issue_date')->default(now());
             $table->date('due_date')->default(now()->addDays(14));
             $table->date('return_date')->nullable();
-            $table->text('note')->nullable();
+            $table->text('notes')->nullable();
+            $table->enum('status', ['issued', 'returned', 'overdue'])->default('issued');
             $table->timestamps();
         });
     }

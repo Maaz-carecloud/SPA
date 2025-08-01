@@ -55,6 +55,8 @@ use App\Livewire\Library\Issue\Create as IssueCreate;
 use App\Livewire\Library\Issue\Edit as IssueEdit;
 use App\Livewire\Library\Issue\View as IssueView;
 
+use App\Livewire\Library\Fine\Index as FineIndex;
+
 use App\Livewire\User\Teacher\Index as TeacherIndex;
 use App\Livewire\User\Teacher\View as TeacherView;
 
@@ -172,9 +174,14 @@ Route::group(['middleware' => ['web','auth','activity']], function () {
 
     // Library Issues Management Routes
     Route::get('/library/issues', IssueIndex::class)->name('library.issues.index');
+    Route::post('/datatable/library/issues', [IssueIndex::class, 'getDataTableRows'])->name('datatable.library.issues');
     Route::get('/library/issues/create', IssueCreate::class)->name('library.issues.create');
     Route::get('/library/issues/{issue}/edit', IssueEdit::class)->name('library.issues.edit');
     Route::get('/library/issues/{issue}/view', IssueView::class)->name('library.issues.view');
+
+    // Library Fines Management Routes
+    Route::get('/library/fines', FineIndex::class)->name('library.fines.index');
+    Route::post('/datatable/library/fines', [FineIndex::class, 'getDataTableRows'])->name('datatable.library.fines');
 
     // Route::get('/update-password', \App\Livewire\UpdatePassword::class)->name('update-password');
 });
