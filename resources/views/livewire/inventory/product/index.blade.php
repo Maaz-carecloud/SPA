@@ -1,52 +1,83 @@
-<x-data-table 
-    title="Products"
-    :createRoute="route('add-product')"
-    createButtonText="Create New Product"
-    searchPlaceholder="Search by Product Name..."
-    :items="$products"
-    :isPageHeader="true"
-    :showSearch="true"
-    :showExport="true"
-    :showPagination="true"
-    :showPerPage="true"
-    :perPageOptions="[10, 20, 30, 50, 100]"
-    :headers="['#', 'Product Name', 'Barcode', 'Category', 'Buy Price', 'Sell Price', 'Stock', 'Status', 'Date Added', 'Actions']"
-    :sortableHeaders="['id', 'name', 'barcode', null, 'buying_price', 'selling_price', 'quantity', null, 'created_at', null]"
->
-        @forelse($products as $index => $product)
-            <tr>
-                <td>{{ $products->firstItem() + $index }}</td>
-                <td>{{ $product->name ?? 'N/A' }}</td>
-                <td>{{ $product->barcode ?? 'N/A' }}</td>
-                <td>{{ $product->category->name ?? 'N/A' }}</td>
-                <td>${{ number_format($product->buying_price ?? 0, 2) }}</td>
-                <td>${{ number_format($product->selling_price ?? 0, 2) }}</td>
-                <td>{{ $product->quantity ?? 'N/A' }}</td>
-                <td>
-                    <span class="badge {{ $product->is_active ? 'bg-success' : 'bg-danger' }}">
-                        {{ $product->is_active ? 'Active' : 'Inactive' }}
-                    </span>
-                </td>
-                <td>{{ $product->created_at ? $product->created_at->format('Y-m-d') : 'N/A' }}</td>
-                <td>
-                    <div class="action-items">
-                        <span href="{{ route('view-product', $product->id) }}" wire:navigate>
-                            <i class="fa fa-eye"></i>
-                        </span>
-                        <span href="{{ route('edit-product', $product->id) }}" wire:navigate>
-                            <i class="fa fa-edit"></i>
-                        </span>
-                        <span wire:click="delete({{ $product->id }})" wire:confirm="Are you sure you want to delete this product?">
-                            <i class="fa fa-trash"></i>
-                        </span>
+<x-sections.default>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Products</h3>
+        <button type="button" class="btn theme-filled-btn" data-bs-toggle="modal" data-bs-target="#createModal">
+            + Create
+        </button>
+    </div>
+
+    @php
+        $columns = ['#', 'Product Name', 'Barcode', 'Category', 'Buy Price', 'Sell Price', 'Stock', 'Status', 'Date Added', 'Action'];
+        $ajaxUrl = route('datatable.products');
+    @endphp
+    <livewire:data-table :columns="$columns" table-id="productsTable" :ajax-url="$ajaxUrl" :key="microtime(true)" />
+
+    <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit" :is_not_crud="false">
+        <form>
+            <div class="row">
+                <div class="col-md-6">
+                    <x-form.input id="name" type="text" name="name" label="Product Name" 
+                        wire:model="name" placeholder="Enter product name" :error="$errors->first('name')" />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input id="barcode" type="text" name="barcode" label="Barcode" 
+                        wire:model="barcode" placeholder="Enter barcode (optional)" :error="$errors->first('barcode')" />
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <x-form.select2 
+                        id="product_category_id" 
+                        name="product_category_id" 
+                        label="Category" 
+                        wire:model="product_category_id" 
+                        :options="$categories ? $categories->pluck('name', 'id')->toArray() : []"
+                        placeholder="Select Category"
+                        :error="$errors->first('product_category_id')"
+                        wire:ignore
+                    />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input id="quantity" type="number" name="quantity" label="Stock Quantity" 
+                        wire:model="quantity" placeholder="Enter stock quantity" min="0" :error="$errors->first('quantity')" />
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <x-form.price-input id="buying_price" name="buying_price" label="Buying Price" 
+                        wire:model="buying_price" placeholder="0.00" :error="$errors->first('buying_price')" />
+                </div>
+                <div class="col-md-6">
+                    <x-form.price-input id="selling_price" name="selling_price" label="Selling Price" 
+                        wire:model="selling_price" placeholder="0.00" :error="$errors->first('selling_price')" />
+                </div>
+            </div>
+            
+            <x-form.textarea id="description" name="description" label="Description" 
+                wire:model="description" placeholder="Enter product description (optional)" rows="3" :error="$errors->first('description')" />
+            
+            <div class="mb-3">
+                <label for="imageToUpload" class="form-label">Product Image</label>
+                <input type="file" class="form-control" id="imageToUpload" name="imageToUpload" 
+                    wire:model="imageToUpload" accept="image/*">
+                @if($errors->first('imageToUpload'))
+                    <div class="invalid-feedback d-block">{{ $errors->first('imageToUpload') }}</div>
+                @endif
+            </div>
+            
+            @if($currentImage && $is_edit)
+                <div class="mb-3">
+                    <label class="form-label">Current Image</label>
+                    <div>
+                        <img src="{{ asset('storage/' . $currentImage) }}" alt="Current Product Image" style="max-width: 100px; max-height: 100px;" class="img-thumbnail">
                     </div>
-                </td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="10" class="text-danger text-center">No Products Found</td>
-            </tr>
-        @endforelse
-</x-data-table>
-  
-    
+                </div>
+            @endif
+            
+            <x-form.checkbox id="is_active" name="is_active" label="Is Active?" 
+                wire:model="is_active" :checked="$is_active" />
+        </form>
+    </x-modal>
+</x-sections.default>

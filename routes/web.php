@@ -110,21 +110,25 @@ Route::group(['middleware' => ['web','auth','activity']], function () {
     Route::post('/datatable/modules', [ModuleIndex::class, 'getDataTableRows'])->name('datatable.modules');
 
     Route::get('/categories', CategoryIndex::class)->name('categories');
+    Route::post('/datatable/categories', [CategoryIndex::class, 'getDataTableRows'])->name('datatable.categories');
 
     Route::get('/announcements', AnnouncementIndex::class)->name('announcements');
     Route::post('/datatable/announcements', [AnnouncementIndex::class, 'getDataTableRows'])->name('datatable.announcements');
 
     Route::get('/products', ProductIndex::class)->name('products');
+    Route::post('/datatable/products', [ProductIndex::class, 'getDataTableRows'])->name('datatable.products');
     Route::get('/add-product', ProductCreate::class)->name('add-product');
     Route::get('/view-product/{id}', ProductView::class)->name('view-product');
     Route::get('/edit-product/{id}', ProductEdit::class)->name('edit-product');
 
     Route::get('/warehouses', WarehouseIndex::class)->name('warehouses');
+    Route::post('/datatable/warehouses', [WarehouseIndex::class, 'getDataTableRows'])->name('datatable.warehouses');
     Route::get('/add-warehouse', WarehouseCreate::class)->name('add-warehouse');
     Route::get('/view-warehouse/{id}', WarehouseView::class)->name('view-warehouse');
     Route::get('/edit-warehouse/{id}', WarehouseEdit::class)->name('edit-warehouse');
 
     Route::get('/suppliers', SupplierIndex::class)->name('suppliers');
+    Route::post('/datatable/suppliers', [SupplierIndex::class, 'getDataTableRows'])->name('datatable.suppliers');
     Route::get('/add-supplier', SupplierCreate::class)->name('add-supplier');
     Route::get('/view-supplier/{id}', SupplierView::class)->name('view-supplier');
     Route::get('/edit-supplier/{id}', SupplierEdit::class)->name('edit-supplier');
