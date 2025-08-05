@@ -136,7 +136,7 @@
                                 <tr>
                                     <td colspan="5">
                                         <button type="button" 
-                                                class="btn btn-sm btn-outline-primary" 
+                                                class="btn btn-sm theme-unfilled-btn" 
                                                 wire:click="addProductItem">
                                             <i class="fas fa-plus"></i> Add Item
                                         </button>
