@@ -30,9 +30,6 @@ use App\Livewire\Inventory\Supplier\Edit as SupplierEdit;
 use App\Livewire\Inventory\Supplier\View as SupplierView;
 
 use App\Livewire\Inventory\Purchase\Index as PurchaseIndex;
-use App\Livewire\Inventory\Purchase\Create as PurchaseCreate;
-use App\Livewire\Inventory\Purchase\Edit as PurchaseEdit;
-use App\Livewire\Inventory\Purchase\View as PurchaseView;
 
 use App\Livewire\Inventory\Sale\Index as SaleIndex;
 use App\Livewire\Inventory\Sale\Create as SaleCreate;
@@ -134,9 +131,7 @@ Route::group(['middleware' => ['web','auth','activity']], function () {
     Route::get('/edit-supplier/{id}', SupplierEdit::class)->name('edit-supplier');
 
     Route::get('/purchases', PurchaseIndex::class)->name('purchases');
-    Route::get('/add-purchase', PurchaseCreate::class)->name('purchases.create');
-    Route::get('/view-purchase/{id}', PurchaseView::class)->name('purchases.view');
-    Route::get('/edit-purchase/{id}', PurchaseEdit::class)->name('purchases.edit');
+    Route::post('/datatable/purchases', [PurchaseIndex::class, 'getDataTableRows'])->name('datatable.purchases');
 
     Route::get('/sales', SaleIndex::class)->name('sales');
     Route::get('/add-sale', SaleCreate::class)->name('sales.create');

@@ -28,6 +28,7 @@ return new class extends Migration
             $table->double('tax', 10, 2)->default(0.00);
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
+            
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
             $table->foreign('product_supplier_id')->references('id')->on('product_suppliers')->onDelete('cascade');
             $table->foreign('product_warehouse_id')->references('id')->on('product_warehouses')->onDelete('cascade');

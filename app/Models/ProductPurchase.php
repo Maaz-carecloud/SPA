@@ -21,6 +21,12 @@ class ProductPurchase extends Model
         'updated_by'
     ];
 
+    protected $casts = [
+        'purchase_date' => 'date',
+        'discount' => 'decimal:2',
+        'tax' => 'decimal:2',
+    ];
+
     public function supplier()
     {
         return $this->belongsTo(ProductSupplier::class, 'product_supplier_id');
@@ -39,5 +45,21 @@ class ProductPurchase extends Model
     public function payments()
     {
         return $this->hasMany(ProductPurchasePaid::class, 'product_purchase_id');
+    }
+
+    public static function generateReferenceNo()
+    {
+        $prefix = 'PUR';
+        $date = date('Ymd');
+        $lastPurchase = self::whereDate('created_at', date('Y-m-d'))->latest()->first();
+        
+        if ($lastPurchase) {
+            $lastNumber = (int) substr($lastPurchase->reference_no, -3);
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+        
+        return $prefix . '-' . $date . '-' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
     }
 }
