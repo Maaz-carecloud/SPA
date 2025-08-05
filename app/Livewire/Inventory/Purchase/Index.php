@@ -49,28 +49,38 @@ class Index extends Component
     public $paymentSlip = '';
 
     //form related methods
-    #[Rule('required')]
     public $reference_no;
-    #[Rule('required|date')]
     public $purchase_date;
-    #[Rule('required|exists:product_suppliers,id')]
     public $product_supplier_id;
-    #[Rule('required|exists:product_warehouses,id')]
     public $product_warehouse_id;
-    #[Rule('nullable')]
     public $description;
-    #[Rule('required|in:pending,partial_paid,fully_paid')]
     public $payment_status = 'pending';
-    #[Rule('required|in:refunded,not_refunded')]
     public $refund_status = 'not_refunded';
-    #[Rule('nullable|numeric|min:0')]
     public $discount = 0.00;
-    #[Rule('nullable|numeric|min:0')]
     public $tax = 0.00;
-    #[Rule('required|array|min:1')]
     public $productItems = [];
 
     public $getPurchase;
+
+    // Validation rules for productItems
+    protected function rules()
+    {
+        return [
+            'reference_no' => 'required',
+            'purchase_date' => 'required|date',
+            'product_supplier_id' => 'required|exists:product_suppliers,id',
+            'product_warehouse_id' => 'required|exists:product_warehouses,id',
+            'description' => 'nullable',
+            'payment_status' => 'required|in:pending,partial_paid,fully_paid',
+            'refund_status' => 'required|in:refunded,not_refunded',
+            'discount' => 'nullable|numeric|min:0',
+            'tax' => 'nullable|numeric|min:0',
+            'productItems' => 'required|array|min:1',
+            'productItems.*.product_id' => 'required|exists:products,id',
+            'productItems.*.quantity' => 'required|numeric|min:1',
+            'productItems.*.unit_price' => 'required|numeric|min:0',
+        ];
+    }
 
     #[On('create-purchase')]
     public function save(){

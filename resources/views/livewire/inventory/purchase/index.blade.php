@@ -1,7 +1,7 @@
 <x-sections.default>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>Purchase Management</h3>
-        <button type="button" class="btn theme-filled-btn" data-bs-toggle="modal" data-bs-target="#createModal" wire:click="resetFields">
+        <button type="button" class="btn theme-filled-btn" data-bs-toggle="modal" data-bs-target="#createModal">
             + Create Purchase
         </button>
     </div>
@@ -11,7 +11,7 @@
     @endphp
     <livewire:data-table :columns="$columns" table-id="purchasesTable" ajax-url="/datatable/purchases" :key="microtime(true)" />
 
-    <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit" size="modal-xl">
+    <x-modal id="createModal" :title="$modalTitle" :action="$modalAction" :is_edit="$is_edit">
         <form>
             <div class="row">
                 <!-- Reference Number -->
