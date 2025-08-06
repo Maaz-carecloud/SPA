@@ -32,9 +32,6 @@ use App\Livewire\Inventory\Supplier\View as SupplierView;
 use App\Livewire\Inventory\Purchase\Index as PurchaseIndex;
 
 use App\Livewire\Inventory\Sale\Index as SaleIndex;
-use App\Livewire\Inventory\Sale\Create as SaleCreate;
-use App\Livewire\Inventory\Sale\Edit as SaleEdit;
-use App\Livewire\Inventory\Sale\View as SaleView;
 
 use App\Livewire\User\Student\Index as StudentIndex;
 use App\Livewire\User\Student\View as StudentView;
@@ -134,9 +131,7 @@ Route::group(['middleware' => ['web','auth','activity']], function () {
     Route::post('/datatable/purchases', [PurchaseIndex::class, 'getDataTableRows'])->name('datatable.purchases');
 
     Route::get('/sales', SaleIndex::class)->name('sales');
-    Route::get('/add-sale', SaleCreate::class)->name('sales.create');
-    Route::get('/view-sale/{id}', SaleView::class)->name('sales.view');
-    Route::get('/edit-sale/{id}', SaleEdit::class)->name('sales.edit');
+    Route::post('/datatable/sales', [SaleIndex::class, 'getDataTableRows'])->name('datatable.sales');
 
     Route::get('/students', StudentIndex::class)->name('students');
     Route::post('/datatable/students', [StudentIndex::class, 'getDataTableRows'])->name('datatable.students');

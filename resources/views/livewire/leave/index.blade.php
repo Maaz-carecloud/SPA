@@ -6,7 +6,7 @@
         </button>
     </div>
     @php
-        $columns = ['#', 'Employee', 'Leave Type', 'Reason', 'From', 'To', 'Status', 'Action'];
+        $columns = ['#', 'Employee', 'Leave Type', 'Reason', 'From Date | To Date', 'Status', 'Action'];
         $ajaxUrl = route('datatable.leaves');
     @endphp
     <livewire:data-table :columns="$columns" :ajax-url="$ajaxUrl" table-id="leavesTable" :key="microtime(true)" render-html-cols="[3]" />

@@ -6,11 +6,11 @@
                 class="img-fluid h-100 w-100 object-fit-cover" style="min-height:400px;object-fit:cover;">
         </div>
         <!-- Right: Login Form -->
-        <div class="col-12 col-md-6 bg-light d-flex align-items-center justify-content-center" style="background: #fff2bf!important;">
+        <div class="col-12 col-md-6 bg-light d-flex align-items-center justify-content-center" style="background: #E5DDCB!important;">
             <div class="w-100 p-4 p-md-5 d-flex justify-content-center">
                 <div style="max-width: 600px; width: 100%;">
                     <img src="{{ asset('assets/images/bgs-logo-monogram.webp') }}" class="img-fluid mb-3" style="max-width: 80px;" alt="Bagh Grammar School">
-                    <h2 class="mb-2 fw-bold">Bagh Grammar School</h2>
+                    <h2 class="mb-2 fw-bold" style="color: #C72127">Bagh Grammar School</h2>
                     <p class="mb-4 text-muted">Please login with your credentials!</p>
                     <form wire:submit.prevent="login">
                         <x-form.input 
@@ -43,6 +43,9 @@
                                     <span class="visually-hidden">Loading...</span>
                                 </span>
                             </button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <p class="text-muted mb-0 small">&copy; 2025 Bagh Grammar School. All rights reserved.</p>
                         </div>
                     </form>
                 </div>

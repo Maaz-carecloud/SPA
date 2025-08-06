@@ -161,7 +161,7 @@ class Index extends Component
                     'total_days' => $this->total_days,
                     'attachment' => $this->attachment ? $this->attachment->store('leave_attachments', 'public') : null,
                     'created_by' => Auth::user()->name,
-                    'status' => false,
+                    'status' => true,
                 ]);
             }
             $this->dispatch('success', message: 'Bulk leave created!');
@@ -183,7 +183,7 @@ class Index extends Component
                 'total_days' => $this->total_days,
                 'attachment' => $this->attachment ? $this->attachment->store('leave_attachments', 'public') : null,
                 'created_by' => Auth::user()->name,
-                'status' => false,
+                'status' => true,
             ]);
             $this->dispatch('success', message: 'Leave created!');
         }
@@ -312,8 +312,7 @@ class Index extends Component
                 e(optional($leave->user)->name),
                 e(optional($leave->leaveType)->name),
                 $leave->leave_reason,
-                $leave->date_from ? e($leave->date_from->format('Y-m-d')) : '',
-                $leave->date_to ? e($leave->date_to->format('Y-m-d')) : '',
+                ($leave->date_from ? e($leave->date_from->format('M d Y')) : '') .' | '.($leave->date_to ? e($leave->date_to->format('M d Y')) : ''),
                 e($leave->status == 1 ? 'Approved' : 'Pending'),
                 $actionHtml
             ];

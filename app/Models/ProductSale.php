@@ -39,4 +39,20 @@ class ProductSale extends Model
     {
         return $this->hasMany(ProductSalePaid::class, 'product_sale_id');
     }
+
+    public static function generateReferenceNo()
+    {
+        $prefix = 'SAL';
+        $date = date('Ymd');
+        $lastSale = self::whereDate('created_at', date('Y-m-d'))->latest()->first();
+        
+        if ($lastSale) {
+            $lastNumber = (int) substr($lastSale->reference_no, -3);
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+        
+        return $prefix . '-' . $date . '-' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+    }
 }

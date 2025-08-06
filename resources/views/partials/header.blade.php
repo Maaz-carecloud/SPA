@@ -97,7 +97,7 @@
 
       </button>
       <ul class="dropdown-menu w-100">
-        <li><a class="dropdown-item text-gary" href="#">Profile</a></li>
+        {{-- <li><a class="dropdown-item text-gary" href="#">Profile</a></li> --}}
         <li><a class="dropdown-item text-gary" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#passwordresetModal">Update
             Password</a></li>
         <li><a class="dropdown-item text-gary" href="{{ route('logout') }}">Logout</a></li>
